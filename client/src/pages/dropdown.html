@@ -19,20 +19,22 @@ var subjectObject = {
     "Spinach": ["Cream", "Garlic", "Pasta", "Salt"],
     "Potatoes": ["Butter", "Salt", "Milk", "Garlic"]  
 },
-"Fish": {
+"Peanut Butter": {
     "Asparagus": ["Mariana", "Garlic", "Lemon", "Milk"],
     "Spinach": ["Cream", "Garlic", "Pasta", "Salt"],
     "Potatoes": ["Butter", "Salt", "Milk", "Garlic"]  
-}}
+}
+
+}
 
 window.onload = function() {
-  var meatSel = document.getElementById("meat");
+  var proteinSel = document.getElementById("meat");
   var vegetableSel = document.getElementById("vegetable");
   var miscSel = document.getElementById("misc");
   for (var x in meatObject) {
     meatSel.options[meatSel.options.length] = new Option(x, x);
   }
-  meatSel.onchange = function() {
+  proteinSel.onchange = function() {
     
     vegetableSel.length = 1;
     miscSel.length = 1;
@@ -45,7 +47,7 @@ window.onload = function() {
     
     miscSel.length = 1;
     
-    var z = meatObject[meatSel.value][this.value];
+    var z = proteinObject[proteinSel.value][this.value];
     for (var i = 0; i < z.length; i++) {
       miscSel.options[miscSel.options.length] = new Option(z[i], z[i]);
     }
@@ -58,7 +60,7 @@ window.onload = function() {
 <h1>Choose Your Ingredients</h1>
 
   <form name="form1" id="form1" action="/action_page.php">
-    Meat: <select name="meat" id="meat">
+    Protein: <select name="meat" id="meat">
       <option value="" selected="selected">Select meat</option>
     </select>
     <br><br>
