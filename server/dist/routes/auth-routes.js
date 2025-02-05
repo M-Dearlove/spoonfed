@@ -12,7 +12,7 @@ export const login = async (req, res) => {
     }
     const verifyPassword = await bcrypt.compare(password, user.password);
     if (!verifyPassword) {
-        return res.status(401).json({ message: 'Authentication failed' });
+        return res.status(401).json({ message: 'Invalid password' });
     }
     const jwtKey = process.env.JWT_SECRET_KEY || '';
     const token = jwt.sign({ username }, jwtKey, { expiresIn: '1h' });
