@@ -1,14 +1,11 @@
-import './App.css'
+import "./App.css";
 
 function App() {
-
   return (
     <>
-      <div>
-        Login Page
-      </div>
+      <p>Main page</p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
