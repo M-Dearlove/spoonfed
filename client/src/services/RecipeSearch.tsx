@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import RecipeList from '../components/RecipeList';
-import searchRecipes from './RecipeService';
+
 import { Recipe } from '../interfaces/recipe';
 
 

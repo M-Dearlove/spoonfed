@@ -1,5 +1,4 @@
 import React from "react";
-import { Recipe } from "../interfaces/recipe";
 
 interface MainPageProps {
   // Add props if needed

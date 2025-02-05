@@ -6,7 +6,6 @@ import React from 'react';
 import App from './components/app';
 import ErrorPage from './pages/ErrorPage';
 import MainPage from './pages/Mainpage';
-import RecipeCard from './components/Recipecard';
 import RecipeList from './components/RecipeList';
 import SavedRecipes from './pages/SavedRecipes';
 import Dashboard from './pages/dashboard';
@@ -33,10 +32,7 @@ const router = createBrowserRouter([
         path: '/recipes',
         element: <RecipeList recipes={[]} />  // Handle empty state within component
       },
-      {
-        path: '/recipe/:id',
-        element: <RecipeCard recipe/>  // Handle recipe data fetching within component
-      }
+     
     ]
   }
 ]);
