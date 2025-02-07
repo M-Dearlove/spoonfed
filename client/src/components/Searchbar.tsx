@@ -1,5 +1,6 @@
 import React from 'react';
-import { calltodb } from './your-db-service'; // Assuming this is your database call function
+import { calltodb } from './your-db-service';
+import { SearchResult } from './your-db-service'; // Assuming this is your database call function
 
 interface AppState {
   searchText: string;
@@ -27,7 +28,7 @@ class App extends React.Component<{}, AppState> {
   getResults() {
     const { searchText } = this.state;
     calltodb(searchText).then(response => {
-      this.setState({ searchResults: response.values });
+      this.setState({ searchResults: [...response.values] });
     });
   }
 
@@ -39,7 +40,7 @@ class App extends React.Component<{}, AppState> {
           searchText={this.state.searchText} 
           onSearch={this.getResults}
         />
-        <SearchResults results={this.state.searchResults} />
+        <SearchResult results={this.state.searchResults} />
       </div>
       
     );
