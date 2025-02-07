@@ -14,7 +14,6 @@ import UserProfile from './pages/UserProfile';  // Add this import
 import Dashboard from './pages/dashboard';
 import Login from './pages/Login'
 import './styles/style.css';
-import './styles/images/Spoonfed.png'
 // main.tsx
 const router = createBrowserRouter([
   {
