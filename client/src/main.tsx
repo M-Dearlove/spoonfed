@@ -2,14 +2,19 @@ import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import React from 'react';
 
-// Import components
-import App from './components/app';
+// Fix import paths
+import App from '../app.tsx';
 import ErrorPage from './pages/ErrorPage';
 import MainPage from './pages/Mainpage';
-import RecipeList from './components/RecipeList';
+import RecipeSearch from './components/RecipeSearch';
 import SavedRecipes from './pages/SavedRecipes';
+import PairingDisplay from './components/PairingDisplay.tsx';
+import RecipeDetail from './services/RecipeDetailService.ts';
+import UserProfile from './pages/UserProfile';  // Add this import
 import Dashboard from './pages/dashboard';
-
+import './styles/style.css';
+import './styles/images/Spoonfed.png'
+// main.tsx
 const router = createBrowserRouter([
   {
     path: '/',
@@ -21,22 +26,45 @@ const router = createBrowserRouter([
         element: <MainPage />
       },
       {
-        path: '/dashboard',
+        path: 'dashboard',
         element: <Dashboard />
       },
       {
-        path: '/saved-recipes',
+        path: 'recipe-search',
+        element: <RecipeSearch />
+      },
+      {
+        path: 'profile',
+        element: <UserProfile />
+      },
+      {
+        path: 'saved-recipes',
         element: <SavedRecipes />
       },
       {
-        path: '/recipes',
-        element: <RecipeList recipes={[]} />  // Handle empty state within component
+        path: 'recipe/:id',
+        element: <RecipeDetail />
       },
-     
+      
+        {
+          path: 'pairing/:recipeId', 
+          element: <PairingDisplay recipe={{
+            sourceUrl: '',
+            suggestedPairings: [],
+            customPairings: [],
+            id: '',
+            title: '',
+            description: '',
+            foodGroup: '',
+            ingredients: [],
+            instructions: [],
+            searchMode: false
+          }} />
+        }
+      
     ]
   }
 ]);
-
 // Create root and render
 const rootElement = document.getElementById('root');
 if (rootElement) {
@@ -46,3 +74,4 @@ if (rootElement) {
     </React.StrictMode>
   );
 }
+export default router;

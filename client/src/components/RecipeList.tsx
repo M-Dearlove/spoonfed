@@ -1,79 +1,54 @@
-import React from 'react'
+// RecipeList.tsx
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Recipe } from '../interfaces/recipe';
 
 interface RecipeListProps {
-  recipes: Recipe[];
+  recipes: Recipe[]; 
 }
 
 const RecipeList: React.FC<RecipeListProps> = ({ recipes }) => {
-  if (!recipes.length) {
+  const navigate = useNavigate();
+
+  const handleRecipeClick = (recipeId: string) => {
+    navigate(`/recipe/${recipeId}`);
+  };
+
+  if (recipes.length === 0) {
     return (
-      <div className="text-center p-8">
-        <p className="text-gray-600">No recipes found</p>
+      <div className="text-center p-4">
+        No recipes found.
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Found Recipes:</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {recipes.map((recipe) => (
-          <div key={recipe.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow">
-            <div className="relative h-48">
-              <img 
-                src={recipe.image} 
+    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      {recipes.map((recipe) => (
+        <div className="col" key={recipe.id}>
+          <div 
+            onClick={() => handleRecipeClick(recipe.id)}
+            className="card h-100 shadow-sm"
+            style={{ cursor: 'pointer' }}
+          >
+            {recipe.imageUrl && (
+              <img
+                src={recipe.imageUrl}
                 alt={recipe.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = '/placeholder-recipe.jpg';
-                }}
+                className="card-img-top"
+                style={{ height: '200px', objectFit: 'cover' }}
               />
-            </div>
-            
-            <div className="p-4">
-              <h3 className="text-lg font-semibold">{recipe.title}</h3>
-            </div>
-            
-            <div className="p-4 space-y-4">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-600">
-                  Used Ingredients:
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {recipe.usedIngredients.map((ingredient, index) => (
-                    <span 
-                      key={`used-${recipe.id}-${index}`}
-                      className="px-2 py-1 rounded-full text-sm bg-green-100 text-green-800"
-                    >
-                      {ingredient}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {recipe.missedIngredients.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-600">
-                    Missing Ingredients:
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {recipe.missedIngredients.map((ingredient, index) => (
-                      <span 
-                        key={`missed-${recipe.id}-${index}`}
-                        className="px-2 py-1 rounded-full text-sm bg-red-100 text-red-800"
-                      >
-                        {ingredient}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+            )}
+            <div className="card-body">
+              <h3 className="card-title h5 fw-bold">{recipe.title}</h3>
+              <p className="card-text text-muted">
+                {recipe.ingredients.slice(0, 3).join(', ')}
+                {recipe.ingredients.length > 3 ? '...' : ''}
+              </p>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 };
