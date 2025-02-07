@@ -1,10 +1,82 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
+import ReactDOM from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import React from 'react';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+// Fix import paths
+import App from '../app.tsx';
+import ErrorPage from './pages/ErrorPage';
+import MainPage from './pages/Mainpage';
+import RecipeSearch from './components/RecipeSearch';
+import SavedRecipes from './pages/SavedRecipes';
+import PairingDisplay from './components/PairingDisplay.tsx';
+import RecipeDetail from './services/RecipeDetailService.ts';
+import UserProfile from './pages/UserProfile';  // Add this import
+import Dashboard from './pages/dashboard';
+import Login from './pages/Login'
+import './styles/style.css';
+import './styles/images/Spoonfed.png'
+// main.tsx
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <App />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        index: true,
+        element: <MainPage />
+      },
+      {
+        path: 'login',
+        element: <Login />
+      },
+      {
+        path: 'dashboard',
+        element: <Dashboard />
+      },
+      {
+        path: 'recipe-search',
+        element: <RecipeSearch />
+      },
+      {
+        path: 'profile',
+        element: <UserProfile />
+      },
+      {
+        path: 'saved-recipes',
+        element: <SavedRecipes />
+      },
+      {
+        path: 'recipe/:id',
+        element: <RecipeDetail />
+      },
+      
+        {
+          path: 'pairing/:recipeId', 
+          element: <PairingDisplay recipe={{
+            sourceUrl: '',
+            suggestedPairings: [],
+            customPairings: [],
+            id: '',
+            title: '',
+            description: '',
+            foodGroup: '',
+            ingredients: [],
+            instructions: [],
+            searchMode: false
+          }} />
+        }
+      
+    ]
+  }
+]);
+// Create root and render
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <RouterProvider router={router} />
+    </React.StrictMode>
+  );
+}
+export default router;
