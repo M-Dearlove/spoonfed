@@ -38,11 +38,16 @@ const Nav = () => {
         >
           Profile
         </Link>
-        <a href="./" className="btn btn-primary btn-sm active" role="button" aria-pressed="true">Log out</a>
-
-        
-        <a href='./' className="btn btn-primary btn-sm active" role="button" aria-pressed="true">Log in</a>
-
+        <Link 
+          to="/login"
+          className={`text-xl transition-colors ${
+            currentPage === '/login' 
+              ? 'text-blue-900 font-bold' 
+              : 'text-gray-500 hover:text-blue-700'
+          }`}
+        >
+          Login
+        </Link>
       <div>
 </div>
 <input
