@@ -1,5 +1,7 @@
 import { useState, FormEvent, ChangeEvent } from "react";
-import { Auth } from '../middleware/auth';
+import Auth from '../utils/auth.js';
+
+import { login } from "../api/authAPI";
 
 interface LoginData {
   username: string;
