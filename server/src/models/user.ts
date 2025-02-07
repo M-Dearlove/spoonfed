@@ -23,6 +23,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
     }
 }
 
+// function to create the profiles table
 export function UserGenerator(sequelize: Sequelize): typeof User {
     User.init(
         {
