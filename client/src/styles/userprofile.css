@@ -1,0 +1,12 @@
+h5 {
+    font-family:Poppy;
+    text-align: center;
+    text-wrap:calc();
+    font-size: x-large;
+    color: teal;
+    border-radius: 0%;
+}
+
+img {
+    align-items: flex-start;
+}
