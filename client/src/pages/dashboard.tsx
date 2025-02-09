@@ -169,7 +169,7 @@ const Dashboard: React.FC = () => {
         </div>
       ) : (
         <div className="recipe-grid">
-          {recipes.map((recipe) => (
+          {recipes.slice(0, 6).map((recipe) => (
             <RecipeCard 
               key={recipe.id} 
               recipe={recipe}

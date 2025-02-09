@@ -20,11 +20,13 @@ export const getUserById = async (req: Request, res: Response) => {
   
   // POST /Users
   export const createUser = async (req: Request, res: Response) => {
+    console.log('Received registration request:', req.body);
     const { username, password } = req.body;
     try {
       const newUser = await User.create({ username, password });
       res.status(201).json(newUser);
     } catch (error: any) {
+      console.error('Error creating user:', error);
       res.status(400).json({ message: error.message });
     }
   };
