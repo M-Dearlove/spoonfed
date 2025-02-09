@@ -15,7 +15,6 @@ import Dashboard from './pages/dashboard';
 import Login from './pages/Login'
 import Register from './pages/Register.tsx';
 import './styles/style.css';
-import Signup from './pages/Signup.tsx';
 import IngredientsPage from './pages/Ingredientspage.tsx';
 // main.tsx
 const router = createBrowserRouter([
@@ -56,10 +55,7 @@ const router = createBrowserRouter([
         path:  'ingredient-page',
         element: <IngredientsPage />
       },
-      {
-        path: 'sign-up',
-        element: <Signup />
-      },
+    
       {
         path: 'recipe/:id',
         element: <RecipeDetail />
