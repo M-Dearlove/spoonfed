@@ -45,8 +45,20 @@ const router = createBrowserRouter([
         element: <UserProfile />
       },
       {
+        path: 'register',
+        element: <Register />
+      },
+      {
         path: 'saved-recipes',
         element: <SavedRecipes />
+      },
+      {
+        path:  'ingredient-page',
+        element: <IngredientsPage />
+      },
+      {
+        path: 'sign-up',
+        element: <Signup />
       },
       {
         path: 'recipe/:id',
