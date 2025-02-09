@@ -13,6 +13,7 @@ import RecipeDetail from './services/RecipeDetailService.ts';
 import UserProfile from './pages/UserProfile';  // Add this import
 import Dashboard from './pages/dashboard';
 import Login from './pages/Login'
+import Register from './pages/Register.tsx';
 import './styles/style.css';
 // main.tsx
 const router = createBrowserRouter([
@@ -49,7 +50,10 @@ const router = createBrowserRouter([
         path: 'recipe/:id',
         element: <RecipeDetail />
       },
-      
+      {
+        path: 'register',
+        element: <Register />
+      },
         {
           path: 'pairing/:recipeId', 
           element: <PairingDisplay recipe={{

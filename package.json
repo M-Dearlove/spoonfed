@@ -13,7 +13,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "seed": "cd server && npm run seed",
-    "start": "npm run server && npm run client",
+    "start": "npm run client:build && npm run server",
     "server": "cd server && npm start",
     "client": "cd client && npm start"
   },
