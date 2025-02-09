@@ -10,6 +10,11 @@ router.post('/login', async (req: Request, res: Response) => {
     
     const { username, password } = req.body;
 
+    // Check if JWT_SECRET_KEY is defined
+    if (!process.env.JWT_SECRET_KEY) {
+        return res.status(500).json({ message: 'Server configuration error' });
+    }
+
     try {
         const user = await User.findOne({
             where: { username },

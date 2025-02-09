@@ -1,12 +1,18 @@
 import express from 'express';
-import { getUserById, createUser } from '../../controllers/user-controller.js';
+import { getUserById, createUser, saveRecipe } from '../../controllers/user-controller.js';
+import { authenticateToken } from '../../middleware/auth';
+import { login } from '../../controllers/auth-controllers'
+const app = express.Router();
 
-const router = express.Router();
+// Login route
+app.post('/api/login', login);
 
 // GET request - gets user by id
-router.get('/:id', getUserById);
+app.get('/:id', getUserById);
 
 // POST request - creates a new user
-router.post('/', createUser);
+app.post('/', createUser);
 
-export { router as userRouter };
+app.post('/save-recipe',authenticateToken, saveRecipe)
+
+export { app as userRouter };
