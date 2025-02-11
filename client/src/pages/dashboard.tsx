@@ -2,6 +2,7 @@ import React, { useState, ChangeEvent, FormEvent } from 'react';
 import RecipeCard from '../components/Recipecard';
 import { searchRecipes } from '../services/RecipeService';
 import { Recipe } from '../interfaces/recipe';
+import '../styles/dashboard.css';
 
 const availableIngredients = [
   'Chicken', 'Rice', 'Tomatoes', 'Onions', 'Garlic',
@@ -63,7 +64,6 @@ const Dashboard: React.FC = () => {
         foodGroup: determineFoodGroup(recipe.ingredients)
       };
   
-      // API call to save recipe to user profile
       const response = await fetch('/api/user/save-recipe', {
         method: 'POST',
         headers: {
@@ -82,7 +82,6 @@ const Dashboard: React.FC = () => {
         throw new Error(responseData.message || 'Failed to save recipe');
       }
   
-      // Success handling
       setError('Recipe saved successfully!');
       setTimeout(() => setError(null), 2000);
   
@@ -115,29 +114,26 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-primary-teal">Recipe Search</h1>
+    <div className="container">
+      <div className="header">
+        <h1>Recipe Explorer</h1>
+        <p className="text-description">Your personalized Cookbook </p>
+      </div>
       
       {error && (
-        <div className={`mb-4 p-4 rounded-lg ${
-          error.includes('successfully') 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-red-100 text-red-800'
-        }`}>
+        <div className={`message ${error.includes('successfully') ? 'success' : 'error'}`}>
           <p>{error}</p>
         </div>
       )}
 
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4 text-primary-teal">Add Ingredients:</h2>
-        <form onSubmit={handleAddIngredient} className="mb-4">
-          <div className="flex gap-2">
+      <div className="search-bar-container">
+        <form onSubmit={handleAddIngredient}>
+          <div className="input-group">
             <input
               type="text"
               value={currentIngredient}
               onChange={handleIngredientChange}
               placeholder="Enter an ingredient"
-              className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-teal"
               list="ingredients-list"
             />
             <datalist id="ingredients-list">
@@ -145,28 +141,22 @@ const Dashboard: React.FC = () => {
                 <option key={ingredient} value={ingredient} />
               ))}
             </datalist>
-            <button
-              type="submit"
-              className="button"
-            >
+            <button type="submit" className="button">
               Add
             </button>
           </div>
         </form>
 
         {selectedIngredients.length > 0 && (
-          <div className="mt-4">
-            <h2 className="text-xl font-semibold mb-2 text-primary-teal">Selected Ingredients:</h2>
-            <div className="flex flex-wrap gap-2">
+          <div className="selected-ingredients">
+            <h2 className="section-title">Selected Ingredients:</h2>
+            <div className="ingredient-tags">
               {selectedIngredients.map((ingredient, index) => (
-                <span
-                  key={index}
-                  className="ingredient-tag"
-                >
+                <span key={index} className="ingredient-tag">
                   {ingredient}
                   <button
                     onClick={() => handleRemoveIngredient(ingredient)}
-                    className="ml-2 focus:outline-none"
+                    className="remove-ingredient"
                   >
                     ×
                   </button>
@@ -174,10 +164,7 @@ const Dashboard: React.FC = () => {
               ))}
             </div>
 
-            <button
-              onClick={handleSearch}
-              className="button mt-4"
-            >
+            <button onClick={handleSearch} className="button search-button">
               Search Recipes
             </button>
           </div>
@@ -185,20 +172,20 @@ const Dashboard: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center">
+        <div className="loading-container">
           <div className="loading-spinner"></div>
         </div>
       ) : (
         <div className="recipe-grid">
           {recipes.slice(0, 6).map((recipe) => (
             <RecipeCard 
-              key={recipe.id} 
+              key={recipe.id}
               recipe={recipe}
               recipeId={recipe.id}
               onSave={() => handleSaveRecipe(recipe)}
-              onDelete={() => {}}  // Not needed in search view
+              onDelete={() => { }} 
               isSaved={false}
-              showSaveDelete={true}
+              showSaveDelete={true} 
             />
           ))}
         </div>
