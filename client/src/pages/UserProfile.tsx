@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import UserSavedRecipes from '../components/UserSavedRecipes';
-import '../styles/userprofile.css'
-
-
+import '../styles/userProfile.css';
 
 interface UserPreferences {
   dietaryRestrictions: string[];
@@ -23,8 +21,18 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   cookingSkillLevel: 'intermediate'
 };
 
+const SKILL_LEVELS = [
+  { value: 'beginner', label: 'Beginner Chef' },
+  { value: 'intermediate', label: 'Home Cook' },
+  { value: 'advanced', label: 'Professional Chef' }
+];
+
+const DIETARY_RESTRICTIONS = [
+  'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Nut-Free'
+];
+
 const UserProfilePage: React.FC = () => {
-  const userId = localStorage.getItem('userId');
+  const userId = localStorage.getItem('userId') || '';
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
     name: '',
@@ -32,9 +40,10 @@ const UserProfilePage: React.FC = () => {
     bio: '',
     preferences: DEFAULT_PREFERENCES
   });
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load saved profile data
     const savedProfile = localStorage.getItem(`userProfile_${userId}`);
     if (savedProfile) {
       setProfile(JSON.parse(savedProfile));
@@ -42,8 +51,15 @@ const UserProfilePage: React.FC = () => {
   }, [userId]);
 
   const handleSaveProfile = () => {
-    localStorage.setItem(`userProfile_${userId}`, JSON.stringify(profile));
-    setIsEditing(false);
+    try {
+      localStorage.setItem(`userProfile_${userId}`, JSON.stringify(profile));
+      setIsEditing(false);
+      setSuccessMessage('Profile updated successfully!');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error) {
+      setErrorMessage('Failed to save profile');
+      setTimeout(() => setErrorMessage(null), 3000);
+    }
   };
 
   const handlePreferenceChange = (
@@ -60,129 +76,150 @@ const UserProfilePage: React.FC = () => {
   };
 
   return (
-    <><img
-      src="./"
-      alt='Insert profile image'
-    ></img><div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Profile Information Section */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h5 className="text-2xl font-bold">Your personalized cookbook!</h5>
-                <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="text-blue-500 hover:text-blue-700"
-                >
-                  {isEditing ? 'Cancel' : 'Edit'}
-                </button>
-              </div>
+    <div className="profile-container">
+      <div className="profile-header">
+        <div className="profile-avatar">
+          <div className="profile-avatar-icon" style={{ width: 40, height: 40, backgroundColor: "#4A5568" }} />
+        </div>
+        <h1 className="profile-title">Your Culinary Profile</h1>
+        <p className="profile-subtitle">Customize your cooking preferences and saved recipes</p>
+      </div>
 
+      {(successMessage || errorMessage) && (
+        <div className={successMessage ? 'success-message' : 'error-message'}>
+          {successMessage || errorMessage}
+        </div>
+      )}
+
+      <div className="profile-grid">
+        <div className="profile-left">
+          <div className="profile-section">
+            <div className="section-header">
+              <h2 className="section-title">Profile Details</h2>
+              <button
+                className="profile-button secondary"
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                {isEditing ? (
+                  <span>Save</span>
+                ) : (
+                  <span>Edit</span>
+                )}
+              </button>
+            </div>
+            <div className="section-content">
               {isEditing ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Name</label>
+                <div>
+                  <div className="profile-form-group">
+                    <label className="profile-label">Name</label>
                     <input
                       type="text"
+                      className="profile-input"
                       value={profile.name}
                       onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                    />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <div className="profile-form-group">
+                    <label className="profile-label">Email</label>
                     <input
                       type="email"
+                      className="profile-input"
                       value={profile.email}
                       onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                    />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Bio</label>
+                  <div className="profile-form-group">
+                    <label className="profile-label">Bio</label>
                     <textarea
+                      className="profile-input profile-textarea"
                       value={profile.bio}
                       onChange={(e) => setProfile(prev => ({ ...prev, bio: e.target.value }))}
-                      rows={3}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
-
+                    />
                   </div>
                   <button
+                    className="profile-button"
                     onClick={handleSaveProfile}
-                    className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   >
                     Save Changes
                   </button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Name</h3>
-                    <p className="mt-1">{profile.name || 'Not set'}</p>
+                <div>
+                  <div className="profile-form-group">
+                    <label className="profile-label">Name</label>
+                    <p className="profile-value">{profile.name || 'Click edit to set your name'}</p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Email</h3>
-                    <p className="mt-1">{profile.email || 'Not set'}</p>
+                  <div className="profile-form-group">
+                    <label className="profile-label">Email</label>
+                    <p className="profile-value">{profile.email || 'Click edit to set your email'}</p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Bio</h3>
-                    <p className="mt-1">{profile.bio || 'No bio added yet'}</p>
+                  <div className="profile-form-group">
+                    <label className="profile-label">Bio</label>
+                    <p className="profile-value">{profile.bio || 'Tell us about your cooking journey...'}</p>
                   </div>
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Cooking Preferences Section */}
-            <div className="bg-white rounded-lg shadow p-6 mt-6">
-              <h2 className="text-2xl font-bold mb-4">Cooking Preferences</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Cooking Skill Level</label>
-                  <select
-                    value={profile.preferences.cookingSkillLevel}
-                    onChange={(e) => handlePreferenceChange('cookingSkillLevel', e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  >
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Dietary Restrictions</label>
-                  <div className="mt-2 space-y-2">
-                    {['Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Nut-Free'].map((restriction) => (
-                      <label key={restriction} className="inline-flex items-center mr-4">
-                        <input
-                          type="checkbox"
-                          checked={profile.preferences.dietaryRestrictions.includes(restriction)}
-                          onChange={(e) => {
-                            const newRestrictions = e.target.checked
-                              ? [...profile.preferences.dietaryRestrictions, restriction]
-                              : profile.preferences.dietaryRestrictions.filter(r => r !== restriction);
-                            handlePreferenceChange('dietaryRestrictions', newRestrictions);
-                          } }
-                          className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
-                        <span className="ml-2 text-sm text-gray-600">{restriction}</span>
-                      </label>
-                    ))}
-                  </div>
+          <div className="profile-section">
+            <div className="section-header">
+              <h2 className="section-title">Cooking Preferences</h2>
+            </div>
+            <div className="section-content">
+              <div className="profile-form-group">
+                <label className="profile-label">Cooking Skill Level</label>
+                <select
+                  className="skill-select"
+                  value={profile.preferences.cookingSkillLevel}
+                  onChange={(e) => handlePreferenceChange('cookingSkillLevel', e.target.value)}
+                >
+                  {SKILL_LEVELS.map(level => (
+                    <option key={level.value} value={level.value}>
+                      {level.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="profile-form-group">
+                <label className="profile-label">Dietary Restrictions</label>
+                <div className="preferences-list">
+                  {DIETARY_RESTRICTIONS.map((restriction) => (
+                    <label key={restriction} className="preference-item">
+                      <input
+                        type="checkbox"
+                        className="preference-checkbox"
+                        checked={profile.preferences.dietaryRestrictions.includes(restriction)}
+                        onChange={(e) => {
+                          const newRestrictions = e.target.checked
+                            ? [...profile.preferences.dietaryRestrictions, restriction]
+                            : profile.preferences.dietaryRestrictions.filter(r => r !== restriction);
+                          handlePreferenceChange('dietaryRestrictions', newRestrictions);
+                        }}
+                      />
+                      <span className="preference-label">{restriction}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Saved Recipes Section */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-2xl font-bold mb-6">My Saved Recipes</h2>
-              {userId ? (
-                <UserSavedRecipes userId={userId} />
-              ) : (
-                <p className="text-gray-500">Please log in to see your saved recipes</p>
-              )}
-            </div>
+        <div className="profile-section">
+          <div className="section-header">
+            <h2 className="section-title">My Saved Recipes</h2>
+          </div>
+          <div className="section-content">
+            {userId ? (
+              <UserSavedRecipes />
+            ) : (
+              <p>Please log in to see your saved recipes</p>
+            )}
           </div>
         </div>
-      </div></>
+      </div>
+    </div>
   );
 };
 

@@ -1,129 +1,173 @@
-// PairingDisplay.tsx
-import React from 'react';
-import { Recipe,  } from '../interfaces/recipe';
-
+import React, { useEffect, useState } from 'react';
+import { Recipe } from '../interfaces/recipe';
 
 interface PairingDisplayProps {
   recipe: Recipe;
-  
 }
 
-const PairingDisplay: React.FC<PairingDisplayProps> = ({ recipe}) => {
-  const getSuggestedPairings = () => {
-    const pairings = {
-      wines: [] as string[],
-      cocktails: [] as string[],
-      nonAlcoholic: [] as string[],
-      desserts: [] as string[],
+interface Pairings {
+  cocktails: Array<{
+    name: string;
+    instructions: string;
+  }>;
+  desserts: Array<{
+    name: string;
+    description: string;
+  }>;
+}
+
+const PairingDisplay: React.FC<PairingDisplayProps> = ({ recipe }) => {
+  const [pairings, setPairings] = useState<Pairings>({
+    cocktails: [],
+    desserts: []
+  });
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Simplified cocktail fetch - just get one random cocktail
+  const fetchCocktail = async () => {
+    try {
+      const response = await fetch('https://the-cocktail-db.p.rapidapi.com/random.php', {
+        headers: {
+          'X-RapidAPI-Key': 'ed394f7afdmshbb5c5a3c0efb5e2p109c0ajsn5aa3588aa1e5',
+          'X-RapidAPI-Host': 'the-cocktail-db.p.rapidapi.com'
+        }
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch cocktail');
       
-    };
+      const data = await response.json();
+      const drink = data.drinks?.[0];
 
-    // Determine pairings based on food group
-    switch(recipe.foodGroup?.toLowerCase()) {
-      case 'protein':
-        pairings.wines = ['Cabernet Sauvignon', 'Malbec', 'Syrah'];
-        pairings.cocktails = ['Old Fashioned', 'Manhattan', 'Whiskey Sour'];
-        pairings.nonAlcoholic = ['Sparkling Water with Lime', 'Iced Black Tea', 'Pomegranate Juice'];
-        pairings.desserts = ['Dark Chocolate Mousse', 'Berry Cheesecake', 'Crème Brûlée'];
-        break;
-      case 'pasta':
-      case 'grains':
-        pairings.wines = ['Pinot Grigio', 'Chardonnay', 'Light Rosé'];
-        pairings.cocktails = ['Aperol Spritz', 'Bellini', 'Prosecco Cocktail'];
-        pairings.nonAlcoholic = ['Italian Soda', 'Lemon Spritzer', 'Herb-Infused Water'];
-        pairings.desserts = ['Tiramisu', 'Cannoli', 'Lemon Sorbet'];
-        break;
-      case 'vegetables':
-        pairings.wines = ['Sauvignon Blanc', 'Grüner Veltliner', 'Dry Riesling'];
-        pairings.cocktails = ['Cucumber Gin & Tonic', 'Bloody Mary', 'Garden Spritz'];
-        pairings.nonAlcoholic = ['Green Juice', 'Cucumber Water', 'Herbal Tea'];
-        pairings.desserts = ['Carrot Cake', 'Zucchini Bread', 'Fruit Tart'];
-        break;
-      case 'dairy':
-        pairings.wines = ['Champagne', 'Prosecco', 'Cava'];
-        pairings.cocktails = ['White Russian', 'Mudslide', 'Cream Liqueur'];
-        pairings.nonAlcoholic = ['Horchata', 'Vanilla Bean Steamer', 'Golden Milk'];
-        pairings.desserts = ['Panna Cotta', 'Ice Cream Sundae', 'Rice Pudding'];
-        break;
-      case 'fruits':
-        pairings.wines = ['Moscato', 'Sweet Riesling', 'Ice Wine'];
-        pairings.cocktails = ['Sangria', 'Fruit Mojito', 'Mimosa'];
-        pairings.nonAlcoholic = ['Fruit Smoothie', 'Lemonade', 'Tropical Iced Tea'];
-        pairings.desserts = ['Fruit Cobbler', 'Apple Pie', 'Berry Pavlova'];
-        break;
-      default:
-        pairings.wines = ['House Red', 'House White', 'Rosé'];
-        pairings.cocktails = ['Classic Martini', 'Moscow Mule', 'Margarita'];
-        pairings.nonAlcoholic = ['Sparkling Water', 'Iced Tea', 'Fresh Lemonade'];
-        pairings.desserts = ['Chocolate Cake', 'Vanilla Bean Ice Cream', 'Fresh Fruit Plate'];
+      if (!drink) return null;
+
+      return {
+        name: drink.strDrink || 'Cocktail Suggestion',
+        instructions: drink.strInstructions || 'Mix and serve'
+      };
+    } catch (error) {
+      console.error('Cocktail fetch error:', error);
+      return null;
     }
-
-    return pairings;
   };
 
-  const pairings = getSuggestedPairings();
+  // Simplified dessert fetch
+  const fetchDessert = async () => {
+    try {
+      // Since we don't have access to a dessert API, let's create a few fallback desserts
+      const defaultDesserts = [
+        {
+          name: 'Classic Vanilla Ice Cream',
+          description: 'A versatile dessert that pairs well with most dishes.'
+        },
+        {
+          name: 'Chocolate Brownie',
+          description: 'Rich and decadent, perfect for ending any meal.'
+        },
+        {
+          name: 'Fresh Fruit Tart',
+          description: 'Light and refreshing, ideal for balancing rich main courses.'
+        }
+      ];
+
+      // Randomly select one dessert from our defaults
+      return defaultDesserts[Math.floor(Math.random() * defaultDesserts.length)];
+    } catch (error) {
+      console.error('Dessert fetch error:', error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const fetchPairings = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const [cocktail, dessert] = await Promise.all([
+          fetchCocktail(),
+          fetchDessert()
+        ]);
+
+        setPairings({
+          cocktails: cocktail ? [cocktail] : [],
+          desserts: dessert ? [dessert] : []
+        });
+      } catch (error) {
+        setError('Unable to load pairing suggestions');
+        console.error('Pairing fetch error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPairings();
+  }, [recipe.id]); // Only re-fetch when recipe changes
+
+  if (loading) {
+    return (
+      <div className="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-orange-200 rounded w-1/4"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-orange-100 rounded w-3/4"></div>
+            <div className="h-4 bg-orange-100 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+        <p className="text-orange-800">
+          Unable to load pairing suggestions at this time. Please try again later.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="mt-4 p-4 bg-cream rounded-lg border border-dark-cream">
-      <h3 className="text-lg font-semibold text-primary-teal mb-3">Perfect Pairings</h3>
+    <div className="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+      <h3 className="text-xl font-semibold text-orange-800 mb-4">Perfect Pairings</h3>
       
-      {/* Wine Pairings */}
-      {pairings.wines.length > 0 && (
-        <div className="mb-4">
-          <h4 className="font-medium text-primary-orange mb-2">Wine Selections:</h4>
-          <ul className="list-disc pl-5 space-y-1">
-            {pairings.wines.map((wine, index) => (
-              <li key={index} className="text-gray-700">{wine}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      
-      {/* Cocktail Pairings */}
+      {/* Cocktail Suggestions */}
       {pairings.cocktails.length > 0 && (
-        <div className="mb-4">
-          <h4 className="font-medium text-primary-orange mb-2">Cocktail Options:</h4>
-          <ul className="list-disc pl-5 space-y-1">
-            {pairings.cocktails.map((cocktail, index) => (
-              <li key={index} className="text-gray-700">{cocktail}</li>
-            ))}
-          </ul>
+        <div className="mb-6">
+          <h4 className="font-medium text-orange-700 mb-2">Cocktail Suggestion:</h4>
+          {pairings.cocktails.map((cocktail, index) => (
+            <div key={index} className="bg-white p-3 rounded-lg shadow-sm">
+              <p className="font-medium text-orange-800">{cocktail.name}</p>
+              <p className="text-sm text-orange-600 mt-1">{cocktail.instructions}</p>
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Non-Alcoholic Pairings */}
-      {pairings.nonAlcoholic.length > 0 && (
-        <div className="mb-4">
-          <h4 className="font-medium text-primary-orange mb-2">Non-Alcoholic Beverages:</h4>
-          <ul className="list-disc pl-5 space-y-1">
-            {pairings.nonAlcoholic.map((drink, index) => (
-              <li key={index} className="text-gray-700">{drink}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Dessert Pairings */}
+      {/* Dessert Suggestions */}
       {pairings.desserts.length > 0 && (
-        <div className="mb-4">
-          <h4 className="font-medium text-primary-orange mb-2">Sweet Endings:</h4>
-          <ul className="list-disc pl-5 space-y-1">
-            {pairings.desserts.map((dessert, index) => (
-              <li key={index} className="text-gray-700">{dessert}</li>
-            ))}
-          </ul>
+        <div className="mb-6">
+          <h4 className="font-medium text-orange-700 mb-2">Dessert Suggestion:</h4>
+          {pairings.desserts.map((dessert, index) => (
+            <div key={index} className="bg-white p-3 rounded-lg shadow-sm">
+              <p className="font-medium text-orange-800">{dessert.name}</p>
+              <p className="text-sm text-orange-600 mt-1">{dessert.description}</p>
+            </div>
+          ))}
         </div>
       )}
 
       {/* If no pairings available */}
-      {pairings.wines.length === 0 && pairings.cocktails.length === 0 && 
-       pairings.nonAlcoholic.length === 0 && pairings.desserts.length === 0 && (
-        <p className="text-gray-600">No pairing suggestions available for this recipe.</p>
+      {pairings.cocktails.length === 0 && pairings.desserts.length === 0 && (
+        <p className="text-orange-600">
+          No pairing suggestions available for this recipe.
+        </p>
       )}
       
-      <div className="mt-4 text-sm text-gray-600">
+      <div className="mt-4 text-sm text-orange-600">
         <p className="italic">
-          Tip: These pairings are suggested based on complementary flavors. Feel free to mix and match to find your perfect combination!
+          Tip: These pairings are suggestions based on complementary flavors. Feel free to experiment and find your perfect combination!
         </p>
       </div>
     </div>

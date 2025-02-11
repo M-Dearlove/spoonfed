@@ -1,116 +1,106 @@
-import React, { useState, useEffect } from 'react';
-import RecipeCard from './Recipecard';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Recipe } from '../interfaces/recipe';
 
-const FOOD_GROUPS = [
-  'All',
-  'Vegetables',
-  'Fruits',
-  'Grains',
-  'Protein',
-  'Dairy',
-  'Other'
-] as const;
+const API_BASE_URL = 'http://localhost:3001/api/users';
 
-interface UserSavedRecipesProps {
-  userId: string;
-}
-
-const UserSavedRecipes: React.FC<UserSavedRecipesProps> = ({ userId }) => {
+const SavedRecipes: React.FC = () => {
   const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
-  const [selectedFoodGroup, setSelectedFoodGroup] = useState<string>('All');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadSavedRecipes();
-  }, [userId]);
-
   const loadSavedRecipes = async () => {
     try {
-      setIsLoading(true);
-      // First try to get recipes from API
-      const response = await fetch(`/api/users/${userId}/saved-recipes`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      
+      if (!userId || !token) {
+        throw new Error('No user ID or token found');
+      }
+
+      const response = await axios.get(
+        `${API_BASE_URL}/${userId}/saved-recipes`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         }
-      });
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch saved recipes');
-      }
-
-      const data = await response.json();
-      setSavedRecipes(data);
-
-      // Backup to localStorage
-      localStorage.setItem(`savedRecipes_${userId}`, JSON.stringify(data));
-      setIsLoading(false);
+      setSavedRecipes(response.data.savedRecipes || []);
     } catch (error) {
-      console.error('Failed to load saved recipes:', error);
-      // Fallback to localStorage if API fails
-      const saved = localStorage.getItem(`savedRecipes_${userId}`);
-      if (saved) {
-        setSavedRecipes(JSON.parse(saved));
+      console.error('Error loading recipes:', error);
+      if (axios.isAxiosError(error)) {
+        setError(error.response?.data?.message || 'Failed to load recipes');
+      } else {
+        setError('Failed to load recipes');
       }
-      setError('Failed to load saved recipes from server');
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSaveRecipe = async (recipe: Recipe) => {
-    try {
-      const response = await fetch(`/api/users/${userId}/saved-recipes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ recipe })
-      });
+  useEffect(() => {
+    loadSavedRecipes();
+  }, []);
 
-      if (!response.ok) {
-        throw new Error('Failed to save recipe');
+  const handleClearRecipes = async () => {
+    try {
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      
+      if (!userId || !token) {
+        throw new Error('No user ID or token found');
       }
 
-      // Update local state
-      const updatedRecipes = [...savedRecipes, recipe];
-      setSavedRecipes(updatedRecipes);
-      localStorage.setItem(`savedRecipes_${userId}`, JSON.stringify(updatedRecipes));
-    } catch (error) {
-      console.error('Failed to save recipe:', error);
-      setError('Failed to save recipe');
-    }
-  };
-
-  const handleDeleteRecipe = async (recipeId: string) => {
-    try {
-      const response = await fetch(`/api/users/${userId}/saved-recipes/${recipeId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+      // Assuming you have an endpoint to clear all saved recipes
+      await axios.delete(
+        `${API_BASE_URL}/${userId}/saved-recipes`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         }
-      });
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to delete recipe');
-      }
-
-      // Update local state
-      const updatedRecipes = savedRecipes.filter(recipe => recipe.id !== recipeId);
-      setSavedRecipes(updatedRecipes);
-      localStorage.setItem(`savedRecipes_${userId}`, JSON.stringify(updatedRecipes));
+      setSavedRecipes([]);
     } catch (error) {
-      console.error('Failed to delete recipe:', error);
-      setError('Failed to delete recipe');
+      console.error('Failed to clear recipes:', error);
+      if (axios.isAxiosError(error)) {
+        setError(error.response?.data?.message || 'Failed to clear recipes');
+      } else {
+        setError('Failed to clear recipes');
+      }
     }
   };
 
-  const getFilteredRecipes = () => {
-    if (selectedFoodGroup === 'All') {
-      return savedRecipes;
+  const handleRemoveRecipe = async (recipeId: string) => {
+    try {
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      
+      if (!userId || !token) {
+        throw new Error('No user ID or token found');
+      }
+
+      await axios.delete(
+        `${API_BASE_URL}/${userId}/saved-recipes/${recipeId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      setSavedRecipes(current => current.filter(recipe => recipe.id !== recipeId));
+    } catch (error) {
+      console.error('Failed to remove recipe:', error);
+      if (axios.isAxiosError(error)) {
+        setError(error.response?.data?.message || 'Failed to remove recipe');
+      } else {
+        setError('Failed to remove recipe');
+      }
     }
-    return savedRecipes.filter(recipe => recipe.foodGroup === selectedFoodGroup);
   };
 
   if (isLoading) {
@@ -121,51 +111,65 @@ const UserSavedRecipes: React.FC<UserSavedRecipesProps> = ({ userId }) => {
     );
   }
 
+  if (savedRecipes.length === 0) {
+    return (
+      <div className="text-center p-6">
+        No recipes have been saved yet
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-6">My Saved Recipes</h2>
-      
+    <div className="max-w-6xl mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Saved Recipes</h1>
+        <button
+          onClick={handleClearRecipes}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+        >
+          Clear All
+        </button>
+      </div>
+
       {error && (
         <div className="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">
           <p>{error}</p>
         </div>
       )}
 
-      <div className="mb-6">
-        <label htmlFor="foodGroup" className="block text-sm font-medium text-gray-700 mb-2">
-          Filter by Food Group
-        </label>
-        <select
-          id="foodGroup"
-          value={selectedFoodGroup}
-          onChange={(e) => setSelectedFoodGroup(e.target.value)}
-          className="w-full md:w-64 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {FOOD_GROUPS.map((group) => (
-            <option key={group} value={group}>{group}</option>
-          ))}
-        </select>
-      </div>
-
-      {getFilteredRecipes().length === 0 ? (
-        <p className="text-gray-500 text-center">No saved recipes found</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {getFilteredRecipes().map((recipe) => (
-            <RecipeCard
-              key={recipe.id}
-              recipe={recipe}
-              recipeId={recipe.id}
-              onSave={handleSaveRecipe} 
-              onDelete={handleDeleteRecipe}
-              isSaved={true}
-              showSaveDelete={true}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {savedRecipes.map(recipe => (
+          <div 
+            key={recipe.id} 
+            className="border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+          >
+            <img 
+              src={recipe.image} 
+              alt={recipe.title} 
+              className="w-full h-48 object-cover"
             />
-          ))}
-        </div>
-      )}
+            <div className="p-4">
+              <h2 className="text-xl font-bold mb-2">{recipe.title}</h2>
+              
+              <div className="flex justify-between items-center mt-4">
+                <span className="text-sm text-gray-600">
+                  Food Group: {recipe.foodGroup || 'Unspecified'}
+                </span>
+                <button
+                  onClick={() => handleRemoveRecipe(recipe.id)}
+                  className="p-2 bg-red-100 text-red-600 rounded-full hover:bg-red-200"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
-export default UserSavedRecipes;
+export default SavedRecipes;

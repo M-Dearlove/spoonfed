@@ -3,36 +3,32 @@ import { Link } from "react-router-dom";
 import Auth from "../utils/auth.js";
 import "../index.css";
 import { login } from "../api/authAPI";
-
+import LoginModal from "../components/loginModal.js";
 interface LoginData {
   username: string;
   password: string;
 }
-
 const Login = () => {
+  const [modalShow, setModalShow] = useState(false);
   const [loginData, setLoginData] = useState<LoginData>({
     username: "",
     password: "",
   });
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+
     const { name, value } = e.target;
     setLoginData({
       ...loginData,
       [name]: value,
     });
   };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
     if (!loginData.username || !loginData.password) {
       alert("Both fields are required!");
       return;
     }
-
     try {
       const data = await login(loginData);
       Auth.login(data.token, loginData.username);
@@ -40,7 +36,6 @@ const Login = () => {
       console.error("Failed to login", err);
     }
   };
-
   return (
     <div className="container">
       <form className="form" onSubmit={handleSubmit}>
@@ -59,9 +54,15 @@ const Login = () => {
           value={loginData.password}
           onChange={handleChange}
         />
-        <button className="submit" type="submit">
-          Login
-        </button>
+
+        <button onClick={() => setModalShow(true)} className="submit" type="submit">Login</button>
+        <LoginModal
+          show={modalShow}
+          onHide={() => setModalShow(false)}
+          size="lg"
+          centered
+        />
+
       </form>
       <p className="register">
         Don't have an account? <Link to="/register"> Register here</Link>
