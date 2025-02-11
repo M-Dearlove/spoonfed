@@ -1,7 +1,7 @@
 import { useState, FormEvent, ChangeEvent } from "react";
-import { Link } from 'react-router-dom';
-import Auth from '../utils/auth.js';
-import '../index.css';
+import { Link } from "react-router-dom";
+import Auth from "../utils/auth.js";
+import "../index.css";
 import { login } from "../api/authAPI";
 
 interface LoginData {
@@ -11,15 +11,17 @@ interface LoginData {
 
 const Login = () => {
   const [loginData, setLoginData] = useState<LoginData>({
-    username: '',
-    password: ''
+    username: "",
+    password: "",
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setLoginData({
       ...loginData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -33,9 +35,9 @@ const Login = () => {
 
     try {
       const data = await login(loginData);
-      Auth.login(data.token);
+      Auth.login(data.token, loginData.username);
     } catch (err) {
-      console.error('Failed to login', err);
+      console.error("Failed to login", err);
     }
   };
 
@@ -57,7 +59,9 @@ const Login = () => {
           value={loginData.password}
           onChange={handleChange}
         />
-        <button className="submit" type="submit">Login</button>
+        <button className="submit" type="submit">
+          Login
+        </button>
       </form>
       <p className="register">
         Don't have an account? <Link to="/register"> Register here</Link>
