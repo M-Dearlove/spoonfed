@@ -1,6 +1,6 @@
 import { useState, FormEvent, ChangeEvent } from "react";
 import { registerUser } from "../api/userAPI";
-import Auth from '../utils/auth';
+import Auth from "../utils/auth";
 import { login } from "../api/authAPI";
 import LoginModal from "../components/loginModal";
 interface RegisterData {
@@ -11,50 +11,68 @@ interface RegisterData {
 const Register = () => {
   const [modalShow, setModalShow] = useState(false);
   const [registerData, setRegisterData] = useState<RegisterData>({
-    username: '',
-    password: '',
-    confirmPassword: ''
+    username: "",
+    password: "",
+    confirmPassword: "",
   });
+
   const [error, setError] = useState<string>('');
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setRegisterData({
       ...registerData,
-      [name]: value
+      [name]: value,
     });
   };
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
     setError('');
+
     // Validation
-    if (!registerData.username || !registerData.password || !registerData.confirmPassword) {
-      setError('All fields are required');
+    if (
+      !registerData.username ||
+      !registerData.password ||
+      !registerData.confirmPassword
+    ) {
+      setError("All fields are required");
       return;
     }
     if (registerData.password !== registerData.confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
     try {
+
       console.log('Starting registration process...');
+
       // Register the user
       await registerUser({
         username: registerData.username,
-        password: registerData.password
+        password: registerData.password,
       });
+
       console.log('Registration successful, attempting login...');
+
+
+
       // Automatically log in after successful registration
       const loginResponse = await login({
         username: registerData.username,
-        password: registerData.password
+        password: registerData.password,
       });
       if (!loginResponse || !loginResponse.token) {
-        throw new Error('Login response missing token');
+        throw new Error("Login response missing token");
       }
-      Auth.login(loginResponse.token);
+
+      Auth.login(loginResponse.token, registerData.username);
+     
     } catch (err) {
-      console.error('Registration/Login error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to register account');
+      console.error("Registration/Login error:", err);
+      setError(
+        err instanceof Error ? err.message : "Failed to register account"
+      );
     }
   };
   return (
@@ -94,4 +112,6 @@ const Register = () => {
     </div>
   );
 };
+
 export default Register;
+

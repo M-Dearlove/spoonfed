@@ -1,3 +1,4 @@
+
 import { JwtPayload, jwtDecode } from 'jwt-decode';
 
 class AuthService {
@@ -33,3 +34,4 @@ class AuthService {
   }
 }
 export default new AuthService();
+
