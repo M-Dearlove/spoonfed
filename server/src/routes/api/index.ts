@@ -1,13 +1,5 @@
-import { Router } from "express";
-import { userRouter } from "./user-routes.js";
-import { recipeRouter } from "./recipe-routes.js";
-import { cocktailRouter } from "./cocktail-routes.js";
-import { authenticateToken } from "../../middleware/auth.js";
-
+import { Router } from 'express';
+import { userRouter } from './user-routes.js';
 const router = Router();
-
-router.use("/users", userRouter);
-router.use("/recipes", authenticateToken, recipeRouter);
-router.use("/cocktail", authenticateToken, cocktailRouter);
-
+router.use('/users', userRouter);
 export default router;
