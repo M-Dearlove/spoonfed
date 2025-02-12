@@ -51,6 +51,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     // You can add the decoded user to the request object
     (req as any).user = decoded;
     next();
+    ;
   } catch (err) {
     return res.status(403).json({ message: 'Invalid token' });
   }
