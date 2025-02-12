@@ -1,98 +1,238 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Recipe } from '../interfaces/recipe';
-import PairingDisplay from '../components/PairingDisplay';
+import { Recipe, Pairing } from '../interfaces/recipe';
+import { Drink, Dessert } from '../interfaces/Baseitem';
 
-const RecipeDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+const SPOONACULAR_API_KEY = '3cc81872f31f454d9420393beffe1d15';
+const SPOONACULAR_BASE_URL = 'https://api.spoonacular.com/recipes';
+const RAPIDAPI_KEY = 'your_rapidapi_key_here';
+const COCKTAIL_API_URL = 'https://the-cocktail-db.p.rapidapi.com';
+const DESSERT_API_URL = 'your_dessert_api_endpoint';
 
-  useEffect(() => {
-    const fetchRecipe = async () => {
-      if (!id) {
-        setError('Recipe ID is missing');
-        setLoading(false);
-        return;
-      }
+// RecipeService.ts
+export const getRecipeDetails = async (recipeId: string): Promise<Recipe> => {
+  try {
+    const response = await fetch(`https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${SPOONACULAR_API_KEY}`);
+    
+    if (!response.ok) {
+      throw new Error('API call failed: ${response.status}');
 
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/recipes/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch recipe');
-        }
-        
-        const data = await response.json();
-        setRecipe(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
+    }
+    const data = await response.json();
+    console.log('Recipe Details Response:', data);
+
+    const recipe: Recipe = {
+      id: data.id.toString(),
+      title: data.title,
+      description: data.summary || undefined,
+      summary: data.summary || undefined,
+      cookTime: data.cookTime || undefined,
+      readyInMinutes: data.readyInMinutes || undefined,
+      servings: data.servings || undefined,
+      ingredients: data.extendedIngredients?.map((ing: any) => ing.original) || [],
+      instructions: data.instructions?.split('\n').filter(Boolean) || [],
+      imageUrl: data.image || undefined,
+      image: data.image || undefined,
+      spoonacularId: data.id || undefined,
+      usedIngredients: [],
+      missedIngredients: [],
+      usedIngredientCount: 0,
+      missedIngredientCount: 0,
+      isFavorite: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      suggestedPairings: [], // Will be populated by searchCocktailPairings and searchDessertPairings
+      customPairings: [], // Can be populated by user input or other sources
+      pairings: [] // Will be populated with combined pairings
+      ,
+
+      searchMode: false,
+      handleIngredientSearch: undefined,
+      sourceUrl: undefined,
+      matchingIngredients: data,
+      name: ''
     };
 
-    fetchRecipe();
-  }, [id]);
+    // Fetch pairings asynchronously
+    const [drinks, desserts] = await Promise.all([
+      searchCocktailPairings(recipeId),
+      searchDessertPairings(recipeId)
+    ]);
 
-  if (loading) {
-    return <div className="p-4">Loading...</div>;
+    // Convert drinks and desserts to Pairing type
+    const drinkPairings: Pairing[] = drinks.map(drink => ({
+      id: drink.id,
+      type: 'drink',
+      name: drink.name,
+      description: drink.description,
+      imageUrl: drink.imageUrl
+    }));
+
+    const dessertPairings: Pairing[] = desserts.map(dessert => ({
+      id: dessert.id,
+      type: 'dessert',
+      name: dessert.name,
+      description: dessert.description,
+      imageUrl: dessert.imageUrl
+    }));
+
+    // Add pairings to recipe
+    recipe.pairings = [...drinkPairings, ...dessertPairings];
+    recipe.suggestedPairings = recipe.pairings; // If you want to separate them
+    
+    return recipe;
+
+  } catch (error) {
+    console.error('Error fetching recipe details:', error);
+    throw error;
   }
-
-  if (error || !recipe) {
-    return <div className="p-4 text-red-600">{error || 'Recipe not found'}</div>;
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">{recipe.title}</h1>
-        
-        {recipe.image && (
-          <img
-            src={recipe.image}
-            alt={recipe.title}
-            className="w-full max-w-2xl h-64 object-cover rounded-lg mb-6"
-          />
-        )}
-        
-        {recipe.description && (
-          <p className="text-gray-700 mb-6">{recipe.description}</p>
-        )}
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Ingredients</h2>
-            <ul className="list-disc pl-5 space-y-2">
-              {recipe.ingredients.map((ingredient, index) => (
-                <li key={index} className="text-gray-700">{ingredient}</li>
-              ))}
-            </ul>
-          </div>
-          
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Instructions</h2>
-            <ol className="list-decimal pl-5 space-y-2">
-              {recipe.instructions.map((step, index) => (
-                <li key={index} className="text-gray-700">{step}</li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-6">Recommended Pairings</h2>
-        <PairingDisplay recipe={recipe} />
-      </div>
-    </div>
-  );
 };
 
-export default RecipeDetail;
+export const searchRecipes = async (ingredients: string[]): Promise<Recipe[]> => {
+  try {
+    const ingredientsString = ingredients.join(',');
+    const response = await fetch(
+      `${SPOONACULAR_BASE_URL}/findByIngredients?apiKey=${SPOONACULAR_API_KEY}&ingredients=${ingredientsString}&number=10`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Recipe Search Response:', data);
+
+    return data.map((item: any): Recipe => ({
+      id: item.id.toString(),
+      title: item.title,
+      ingredients: [], // This endpoint doesn't return full ingredients
+      instructions: [], // This endpoint doesn't return instructions
+      image: item.image,
+      imageUrl: item.image,
+      missedIngredientCount: item.missedIngredientCount,
+      missedIngredients: item.missedIngredients.map((ing: any) => ing.name),
+      usedIngredientCount: item.usedIngredientCount,
+      usedIngredients: item.usedIngredients.map((ing: any) => ing.name),
+      suggestedPairings: [],
+      customPairings: [],
+      isFavorite: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      searchMode: true,
+      sourceUrl: undefined,
+      matchingIngredients: '',
+      name: ''
+    }));
+
+  } catch (error) {
+    console.error('Error searching recipes:', error);
+    throw error;
+  }
+};
+
+// Get cocktail pairings
+export const searchCocktailPairings = async (_recipeId: string): Promise<Drink[]> => {
+  try {
+    // Using TheCocktailDB API through RapidAPI
+    const response = await fetch(`${COCKTAIL_API_URL}/filter.php?c=Cocktail`, {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': RAPIDAPI_KEY,
+        'X-RapidAPI-Host': 'the-cocktail-db.p.rapidapi.com',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Cocktail Pairings Response:', data);
+
+    // Return only first 3 drinks as pairings
+    return (data.drinks || []).slice(0, 3).map((drink: any) => ({
+      id: drink.idDrink,
+      name: drink.strDrink,
+      description: 'A perfectly paired cocktail for your meal',
+      type: 'drink',
+      imageUrl: drink.strDrinkThumb
+    }));
+  } catch (error) {
+    console.error('Error fetching cocktail pairings:', error);
+    throw error;
+  }
+};
+
+// Get dessert pairings
+export const searchDessertPairings = async (_recipeId: string): Promise<Dessert[]> => {
+  try {
+    const response = await fetch(DESSERT_API_URL, {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': RAPIDAPI_KEY,
+        'X-RapidAPI-Host': new URL(DESSERT_API_URL).hostname,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Dessert Pairings Response:', data);
+
+    // Return only first 3 desserts as pairings
+    return data.slice(0, 3).map((dessert: any) => ({
+      id: dessert.id.toString(),
+      name: dessert.name,
+      description: dessert.description || 'A delightful dessert pairing',
+      type: 'dessert',
+      imageUrl: dessert.image
+    }));
+  } catch (error) {
+    console.error('Error fetching dessert pairings:', error);
+    throw error;
+  }
+};
+
+// Save a recipe to favorites
+export const saveRecipe = async (recipe: Recipe): Promise<void> => {
+  try {
+    const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]');
+    if (!savedRecipes.some((saved: Recipe) => saved.id === recipe.id)) {
+      savedRecipes.push(recipe);
+      localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
+    }
+  } catch (error) {
+    console.error('Error saving recipe:', error);
+    throw error;
+  }
+};
+
+// Get saved recipes
+export const getSavedRecipes = (): Recipe[] => {
+  try {
+    return JSON.parse(localStorage.getItem('savedRecipes') || '[]');
+  } catch (error) {
+    console.error('Error getting saved recipes:', error);
+    return [];
+  }
+};
+
+// Remove a recipe from saved recipes
+export const removeSavedRecipe = (recipeId: string): void => {
+  try {
+    const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]');
+    const updatedRecipes = savedRecipes.filter((recipe: Recipe) => recipe.id !== recipeId);
+    localStorage.setItem('savedRecipes', JSON.stringify(updatedRecipes));
+  } catch (error) {
+    console.error('Error removing saved recipe:', error);
+    throw error;
+  }
+};
