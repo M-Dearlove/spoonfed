@@ -1,3 +1,4 @@
+
 import { Recipe, Pairing } from '../interfaces/recipe';
 import { Drink, Dessert } from '../interfaces/Baseitem';
 
@@ -43,12 +44,10 @@ export const getRecipeDetails = async (recipeId: string): Promise<Recipe> => {
       customPairings: [], // Can be populated by user input or other sources
       pairings: [] // Will be populated with combined pairings
       ,
-
       searchMode: false,
       handleIngredientSearch: undefined,
       sourceUrl: undefined,
-      matchingIngredients: data,
-      name: ''
+      matchingIngredients: data ,
     };
 
     // Fetch pairings asynchronously
@@ -124,8 +123,7 @@ export const searchRecipes = async (ingredients: string[]): Promise<Recipe[]> =>
       updatedAt: new Date().toISOString(),
       searchMode: true,
       sourceUrl: undefined,
-      matchingIngredients: '',
-      name: ''
+      matchingIngredients: ''
     }));
 
   } catch (error) {
