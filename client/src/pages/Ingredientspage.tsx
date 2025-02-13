@@ -1,92 +1,52 @@
-import React, { useState, useMemo } from 'react';
+// src/pages/IngredientsPage.tsx
+
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Recipe } from '../interfaces/recipe';
 import "../styles/Ingredientpage.css";
 
-interface Recipe {
-  title: string;
-  ingredients: string[];
-  instructions: string[];
-}
+const SPOONACULAR_API_KEY = 'e26291c2c7864721928dd4284508475d';
+const SPOONACULAR_BASE_URL = 'https://api.spoonacular.com/recipes';
 
-const IngredientsPage: React.FC = () => {
-  // Complete ingredient list
-  const allIngredients = [
-    // Proteins
-    'Chicken', 'Beef', 'Pork', 'Turkey', 'Lamb', 
-    'Salmon', 'Tuna', 'Shrimp', 'Tofu', 'Eggs', 
-    'Tempeh', 'Seitan', 'Ground Beef', 'Chicken Breast',
+// Keeping your comprehensive ingredient list
+const allIngredients = [
+  // Proteins
+  'Chicken', 'Beef', 'Pork', 'Turkey', 'Lamb', 
+  'Salmon', 'Tuna', 'Shrimp', 'Tofu', 'Eggs',
+];
 
-    // Vegetables
-    'Tomatoes', 'Onions', 'Garlic', 'Bell Peppers', 'Spinach', 
-    'Broccoli', 'Carrots', 'Zucchini', 'Eggplant', 'Mushrooms', 
-    'Cucumber', 'Lettuce', 'Kale', 'Cauliflower', 'Asparagus', 
-    'Green Beans', 'Sweet Potato', 'Potato', 'Corn', 'Peas',
+const ingredientCategories = {
+ 
+  Vegetables: ['Tomatoes', 'Onions', 'Garlic', 'Bell Peppers', 'Spinach', 'Broccoli', 'Carrots', 'Zucchini'],
+  Fruits: ['Apples', 'Bananas', 'Oranges', 'Strawberries', 'Blueberries', 'Raspberries', 'Pineapple'],
+  Grains: ['Rice', 'Quinoa', 'Barley', 'Oats', 'Bread', 'Pasta', 'Couscous'],
+  Dairy: ['Milk', 'Cheese', 'Yogurt', 'Butter', 'Cream', 'Eggs'],
+  Spices: ['Salt', 'Pepper', 'Garlic Powder', 'Onion Powder', 'Paprika', 'Cumin', 'Chili Powder'],
+  Baking: ['Flour', 'Sugar', 'Baking Soda', 'Baking Powder', 'Vanilla Extract', 'Chocolate Chips'],
+  Canned: ['Tomato Sauce', 'Beans', 'Corn', 'Tuna', 'Chicken Broth', 'Coconut Milk'],
+  Oils: ['Olive Oil', 'Vegetable Oil', 'Coconut Oil', 'Sesame Oil', 'Canola Oil'],
+  Sauces: ['Soy Sauce', 'Teriyaki Sauce', 'BBQ Sauce', 'Ketchup', 'Mayonnaise', 'Mustard'],
+  Nuts: ['Almonds', 'Peanuts', 'Cashews', 'Walnuts', 'Pecans', 'Pistachios'],
+  Legumes: ['Chickpeas', 'Lentils', 'Black Beans', 'Kidney Beans', 'Pinto Beans'],
+  Seafood: ['Salmon', 'Tuna', 'Shrimp', 'Crab', 'Lobster', 'Mussels'],
+  Sweets: ['Chocolate', 'Candy', 'Cookies', 'Cake', 'Pie', 'Ice Cream'],
+  Drinks: ['Coffee', 'Tea', 'Soda', 'Juice', 'Milk', 'Water'],
+  Alcohol: ['Beer', 'Wine', 'Vodka', 'Whiskey', 'Rum', 'Tequila'],
+  Miscellaneous: ['Honey', 'Maple Syrup', 'Vinegar', 'Soy Milk', 'Coconut Water', 'Nutritional Yeast'],
 
-    // Fruits
-    'Apples', 'Bananas', 'Oranges', 'Lemons', 'Limes', 
-    'Strawberries', 'Blueberries', 'Raspberries', 'Avocado', 
-    'Mango', 'Pineapple', 'Grapes', 'Kiwi', 'Peach',
+};
 
-    // Grains and Starches
-    'Rice', 'Pasta', 'Bread', 'Quinoa', 'Couscous', 
-    'Noodles', 'Tortillas', 'Oats', 'Bulgur', 'Barley',
-
-    // Dairy and Alternatives
-    'Milk', 'Cheese', 'Yogurt', 'Butter', 'Cream', 
-    'Sour Cream', 'Almond Milk', 'Coconut Milk',
-
-    // Herbs and Spices
-    'Basil', 'Oregano', 'Thyme', 'Rosemary', 'Parsley', 
-    'Cilantro', 'Mint', 'Dill', 'Cumin', 'Paprika', 
-    'Cinnamon', 'Ginger', 'Turmeric', 'Chili Powder',
-
-    // Legumes
-    'Black Beans', 'Kidney Beans', 'Chickpeas', 'Lentils', 
-    'Green Beans', 'Edamame', 'Pinto Beans',
-
-    // Nuts and Seeds
-    'Almonds', 'Walnuts', 'Pecans', 'Cashews', 'Peanuts', 
-    'Sunflower Seeds', 'Chia Seeds', 'Pumpkin Seeds',
-
-    // Condiments and Sauces
-    'Olive Oil', 'Soy Sauce', 'Honey', 'Maple Syrup', 'Mustard', 
-    'Ketchup', 'Vinegar', 'Hot Sauce', 'Mayonnaise', 'Salsa',
-
-    // Baking Ingredients
-    'Flour', 'Sugar', 'Baking Powder', 'Baking Soda', 'Cocoa Powder', 
-    'Vanilla Extract', 'Chocolate Chips',
-
-    // International Ingredients
-    'Coconut', 'Kimchi', 'Miso', 'Saffron', 'Tahini', 
-    'Curry Paste', 'Harissa', 'Seaweed', 'Wasabi'
-  ];
-
-  // Ingredient Categories
-  const ingredientCategories = {
-    Proteins: ['Chicken', 'Beef', 'Pork', 'Turkey', 'Lamb', 'Salmon', 'Tuna', 'Shrimp', 'Tofu', 'Eggs'],
-    Vegetables: ['Tomatoes', 'Onions', 'Garlic', 'Bell Peppers', 'Spinach', 'Broccoli', 'Carrots', 'Zucchini'],
-    Fruits: ['Apples', 'Bananas', 'Oranges', 'Lemons', 'Strawberries', 'Blueberries', 'Avocado'],
-    Grains: ['Rice', 'Pasta', 'Bread', 'Quinoa', 'Oats', 'Tortillas'],
-    DairyAndAlternatives: ['Milk', 'Cheese', 'Yogurt', 'Butter', 'Almond Milk'],
-    HerbsAndSpices: ['Basil', 'Oregano', 'Thyme', 'Rosemary', 'Cumin', 'Paprika'],
-    Legumes: ['Black Beans', 'Kidney Beans', 'Chickpeas', 'Lentils'],
-    NutsAndSeeds: ['Almonds', 'Walnuts', 'Pecans', 'Cashews', 'Sunflower Seeds'],
-    CondimentsAndSauces: ['Olive Oil', 'Soy Sauce', 'Honey', 'Mustard', 'Ketchup'],
-    InternationalIngredients: ['Coconut', 'Kimchi', 'Miso', 'Curry Paste', 'Harissa']
-  };
-
-  // Hooks and State
+export const IngredientsPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
-  const [generatedRecipe, setGeneratedRecipe] = useState<Recipe | null>(null);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Handle ingredient interaction
   const handleIngredientInteraction = (ingredient: string, mode: 'navigate' | 'select' = 'navigate') => {
     if (mode === 'navigate') {
-      navigate(`/ingredient/${ingredient.toLowerCase().replace(/\s+/g, '-')}`, {
-        state: { ingredient }
-      });
+      navigate(`/ingredient/${ingredient.toLowerCase().replace(/\s+/g, '-')}`);
     } else {
       setSelectedIngredients(prev => {
         const newSet = new Set(prev);
@@ -100,50 +60,84 @@ const IngredientsPage: React.FC = () => {
     }
   };
 
-  // Filter ingredients based on search term
+  const searchRecipes = useCallback(async () => {
+    if (selectedIngredients.size === 0) {
+      setError('Please select at least one ingredient');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const ingredientsString = Array.from(selectedIngredients).join(',');
+      const response = await fetch(
+        `${SPOONACULAR_BASE_URL}/findByIngredients?apiKey=${SPOONACULAR_API_KEY}&ingredients=${ingredientsString}&number=6`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch recipes');
+      }
+
+      const data = await response.json();
+      
+      
+      const detailedRecipes = await Promise.all(
+        data.map(async (recipe: any) => {
+          const detailResponse = await fetch(
+            `${SPOONACULAR_BASE_URL}/${recipe.id}/information?apiKey=${SPOONACULAR_API_KEY}`
+          );
+          const detailData = await detailResponse.json();
+          
+          return {
+            id: recipe.id.toString(),
+            title: recipe.title,
+            imageUrl: recipe.image,
+            image: recipe.image,
+            ingredients: detailData.extendedIngredients?.map((ing: any) => ing.original) || [],
+            instructions: detailData.instructions?.split('\n').filter(Boolean) || [],
+            usedIngredients: recipe.usedIngredients.map((ing: any) => ing.name),
+            missedIngredients: recipe.missedIngredients.map((ing: any) => ing.name),
+            usedIngredientCount: recipe.usedIngredientCount,
+            missedIngredientCount: recipe.missedIngredientCount,
+            pairings: [],
+            isFavorite: false,
+            searchMode: true,
+            foodGroup: '',
+            sourceUrl: detailData.sourceUrl,
+            matchingIngredients: recipe.usedIngredients.map((ing: any) => ing.name).join(', '),
+            name: recipe.title,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+        })
+      );
+
+      setRecipes(detailedRecipes);
+
+      if (detailedRecipes.length === 0) {
+        setError('No recipes found with selected ingredients');
+      }
+    } catch (error) {
+      console.error('Error searching recipes:', error);
+      setError(error instanceof Error ? error.message : 'Failed to search recipes');
+      setRecipes([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedIngredients]);
+
   const filteredIngredients = useMemo(() => {
     return allIngredients.filter(ingredient => 
       ingredient.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [searchTerm]);
 
-  // Generate Recipe
-  const handleGenerateRecipe = async () => {
-    if (selectedIngredients.size === 0) {
-      alert("Please select ingredients!");
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/generate-recipe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          ingredients: Array.from(selectedIngredients)
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate recipe');
-      }
-
-      const recipe: Recipe = await response.json();
-      setGeneratedRecipe(recipe);
-    } catch (err) {
-      console.error("Error generating recipe:", err);
-      alert('Failed to generate recipe, please try again!');
-    }
-  };
-
   return (
     <div className="ingredients-page">
       <div className="ingredients-container">
         <h1 className="page-title">Ingredients Library</h1>
 
-        {/* Search Section */}
         <div className="search-container">
           <input
             type="text"
@@ -158,16 +152,21 @@ const IngredientsPage: React.FC = () => {
               Selected: {selectedIngredients.size}
             </span>
             <button
-              onClick={handleGenerateRecipe}
-              disabled={selectedIngredients.size === 0}
+              onClick={searchRecipes}
+              disabled={selectedIngredients.size === 0 || isLoading}
               className="generate-button"
             >
-              Generate Recipe
+              {isLoading ? 'Searching...' : 'Find Recipes'}
             </button>
           </div>
         </div>
 
-        {/* Main Ingredients Grid */}
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+
         <div className="ingredients-grid">
           {filteredIngredients.map((ingredient, index) => (
             <div
@@ -190,30 +189,27 @@ const IngredientsPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Generated Recipe Display */}
-        {generatedRecipe && (
-          <div className="generated-recipe">
-            <h2 className="recipe-title">{generatedRecipe.title}</h2>
-            <div className="recipe-section">
-              <h3>Ingredients:</h3>
-              <ul>
-                {generatedRecipe.ingredients.map((ingredient, index) => (
-                  <li key={index}>{ingredient}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="recipe-section">
-              <h3>Instructions:</h3>
-              <ol>
-                {generatedRecipe.instructions.map((step, index) => (
-                  <li key={index}>{step}</li>
-                ))}
-              </ol>
-            </div>
+        {recipes.length > 0 && (
+          <div className="recipes-grid">
+            {recipes.map((recipe) => (
+              <div key={recipe.id} className="recipe-card">
+                <img src={recipe.imageUrl} alt={recipe.title} className="recipe-image" />
+                <h3>{recipe.title}</h3>
+                <div className="recipe-ingredients">
+                  <p>Used Ingredients: {recipe.usedIngredientCount}</p>
+                  <p>Missing Ingredients: {recipe.missedIngredientCount}</p>
+                </div>
+                <button 
+                  onClick={() => navigate(`/recipe/${recipe.id}`)}
+                  className="view-recipe-btn"
+                >
+                  View Recipe
+                </button>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Ingredient Categories */}
         {Object.entries(ingredientCategories).map(([category, ingredients]) => (
           <div key={category} className="category-section">
             <h2 className="category-title">

@@ -1,6 +1,6 @@
 // RecipeCard.tsx
 import React from 'react';
-import { Recipe } from '../interfaces/recipe';
+import { Pairing, Recipe } from '../interfaces/recipe';
 import PairingDisplay from './PairingDisplay';
 
 interface RecipeCardProps {
@@ -10,6 +10,8 @@ interface RecipeCardProps {
   onDelete: (id: string) => void;
   isSaved: boolean;
   showSaveDelete: boolean;
+  cocktailPairing?: Pairing;
+
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ 

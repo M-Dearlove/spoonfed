@@ -1,23 +1,14 @@
-/* Base styles */
-:root {
-    --primary-red: #D92323;     /* Deep red for main elements */
-    --secondary-red: #FF6B6B;   /* Lighter red for accents */
-    --primary-yellow: #FFD93D;  /* Warm yellow */
-    --secondary-yellow: #FFE69C; /* Light yellow for backgrounds */
-    --text-dark: #2C2C2C;       /* Dark gray for text */
-    --text-light: #FFFFFF;      /* White text */
-  }
+
   
   body {
     margin: 0;
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(135deg, var(--secondary-yellow) 0%, var(--secondary-red) 100%);
     min-height: 100vh;
   }
   
   /* Navigation styles */
   nav {
-    background-color: var(--primary-red);
+    background-color:var(--cream-bg);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
@@ -87,7 +78,6 @@
     color: var(--primary-red);
   }
   
-  /* Tags/Pills for ingredients */
   .ingredient-tag {
     background-color: var(--primary-yellow);
     color: var(--text-dark);
@@ -98,7 +88,6 @@
     display: inline-block;
   }
   
-  /* Grid layout for recipe cards */
   .recipe-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -106,7 +95,6 @@
     padding: 2rem 0;
   }
   
-  /* Animation for loading states */
   .loading-spinner {
     border: 4px solid var(--secondary-yellow);
     border-top: 4px solid var(--primary-red);
@@ -121,7 +109,6 @@
     100% { transform: rotate(360deg); }
   }
   
-  /* Responsive design */
   @media (max-width: 768px) {
     .recipe-grid {
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
