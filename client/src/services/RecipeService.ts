@@ -1,7 +1,7 @@
 import { Recipe, Pairing } from '../interfaces/recipe';
 import { Drink, Dessert } from '../interfaces/Baseitem';
 
-const SPOONACULAR_API_KEY = 'e26291c2c7864721928dd4284508475d';
+const SPOONACULAR_API_KEY = 'e2537b3be41447b78c479963501a884b';
 const SPOONACULAR_BASE_URL = 'https://api.spoonacular.com/recipes';
 const RAPIDAPI_KEY = 'your_rapidapi_key_here';
 const COCKTAIL_API_URL = 'https://the-cocktail-db.p.rapidapi.com';
