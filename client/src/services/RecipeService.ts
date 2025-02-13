@@ -1,8 +1,7 @@
-
 import { Recipe, Pairing } from '../interfaces/recipe';
 import { Drink, Dessert } from '../interfaces/Baseitem';
 
-const SPOONACULAR_API_KEY = '3cc81872f31f454d9420393beffe1d15';
+const SPOONACULAR_API_KEY = 'e26291c2c7864721928dd4284508475d';
 const SPOONACULAR_BASE_URL = 'https://api.spoonacular.com/recipes';
 const RAPIDAPI_KEY = 'your_rapidapi_key_here';
 const COCKTAIL_API_URL = 'https://the-cocktail-db.p.rapidapi.com';
@@ -44,10 +43,11 @@ export const getRecipeDetails = async (recipeId: string): Promise<Recipe> => {
       customPairings: [], // Can be populated by user input or other sources
       pairings: [] // Will be populated with combined pairings
       ,
+
       searchMode: false,
       handleIngredientSearch: undefined,
       sourceUrl: undefined,
-      matchingIngredients: data ,
+      matchingIngredients: data,
     };
 
     // Fetch pairings asynchronously
@@ -123,7 +123,7 @@ export const searchRecipes = async (ingredients: string[]): Promise<Recipe[]> =>
       updatedAt: new Date().toISOString(),
       searchMode: true,
       sourceUrl: undefined,
-      matchingIngredients: ''
+      matchingIngredients: '',
     }));
 
   } catch (error) {
