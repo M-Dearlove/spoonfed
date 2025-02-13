@@ -4,7 +4,7 @@ import RecipeCard from '../components/Recipecard';
 import { Recipe, Pairing } from '../interfaces/recipe';
 import '../styles/dashboard.css';
 
-const SPOONACULAR_API_KEY = 'e26291c2c7864721928dd4284508475d';
+const SPOONACULAR_API_KEY = 'e2537b3be41447b78c479963501a884b';
 const COCKTAIL_API_KEY = 'ed394f7afdmshbb5c5a3c0efb5e2p109c0ajsn5aa3588aa1e5';
 const SPOONACULAR_BASE_URL = 'https://api.spoonacular.com/recipes';
 
