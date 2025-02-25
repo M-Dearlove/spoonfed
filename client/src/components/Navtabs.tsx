@@ -1,9 +1,18 @@
 import { Link, useNavigate } from "react-router-dom";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
+import Container from "react-bootstrap/Container";
+import { useState } from "react";
+import "../styles/Navtabs.css";
 
-const Nav = () => {
-  const currentPage = window.location.pathname;
+const Navigation = () => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isHovered2, setIsHovered2] = useState(false);
+  const [isHovered3, setIsHovered3] = useState(false);
+  const [isHovered4, setIsHovered4] = useState(false);
+  const [isHovered5, setIsHovered5] = useState(false);
+  const [isHovered6, setIsHovered6] = useState(false);
   const token = localStorage.getItem("id_token");
-  const username = localStorage.getItem("username");
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -13,80 +22,115 @@ const Nav = () => {
   };
 
   return (
-    <nav className="w-full py-4 bg-gray-50">
-      <div className="container mx-auto px-4 flex gap-8">
-        <Link
-          to="/"
-          className={`text-xl transition-colors ${currentPage === "/"
-              ? "text-blue-900 font-bold"
-              : "text-gray-500 hover:text-blue-700"
-            }`}
+    <Navbar className="navbar custom-navbar" collapseOnSelect expand="lg" sticky="top">
+      <Container>
+        <Navbar.Brand
+          as={Link}
+          to={"/"}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          style={{
+            color: isHovered ? "#794494" : "white",
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+            backgroundColor: isHovered ? "#F4E0FD" : "transparent",
+          }}
         >
-          Home
-        </Link>
-        <Link
-          to="/dashboard"
-          className={`text-xl transition-colors ${currentPage === "/dashboard"
-              ? "text-blue-900 font-bold"
-              : "text-gray-500 hover:text-blue-700"
-            }`}
-        >
-          Recipes
-        </Link>
-
-        {token ? (
-          <>
-            {/* Profile Link */}
-            <Link
-              to="/profile"
-              className={`text-xl transition-colors ${currentPage === "/profile"
-                  ? "text-blue-900 font-bold"
-                  : "text-gray-500 hover:text-blue-700"
-                }`}
-            >
-              Profile
-            </Link>
-            {/* Logout Button */}
-            <Link
-              to="#"
-              onClick={(e) => {
-                e.preventDefault(); // Prevent navigation
-                handleLogout(); // Call logout function
-              }}
-              className={`text-xl transition-colors ${currentPage === "/logout"
-                  ? "text-blue-900 font-bold"
-                  : "text-gray-500 hover:text-blue-700"
-                }`}
-            >
-              Logout
-            </Link>
-
-            {/* User Profile Link (Showing Username) */}
-            <Link
-              to="/profile"
-              className={`text-xl transition-colors ${currentPage === "/profile"
-                  ? "text-blue-900 font-bold"
-                  : "text-gray-500 hover:text-blue-700"
-                }`}
-            >
-              <span className="!text-green-600 font-semibold">{username}</span>
-            </Link>
-          </>
-        ) : (
-          /* Show Login Link if No Token */
-          <Link
-            to="/login"
-            className={`text-xl transition-colors ${currentPage === "/login"
-                ? "text-blue-900 font-bold"
-                : "text-gray-500 hover:text-blue-700"
-              }`}
+          Spoon Fed
+        </Navbar.Brand>
+        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+        <Navbar.Collapse id="responsive-navbar-nav">
+          <Nav
+            className="ms-auto"
+            style={{
+              color: "white",
+              fontSize: "1.3rem"
+            }}
           >
-            Login
-          </Link>
-        )}
-      </div>
-    </nav>
+            {/* Homepage Link */}
+            <Nav.Link
+              as={Link}
+              to="/"
+              onMouseEnter={() => setIsHovered2(true)}
+              onMouseLeave={() => setIsHovered2(false)}
+              style={{
+                color: isHovered2 ? "#794494" : "white",
+                fontSize: "1.3rem",
+                backgroundColor: isHovered2 ? "#F4E0FD" : "transparent",
+              }}
+            >
+              Home
+            </Nav.Link>
+            {/* Ingredient Page */}
+            <Nav.Link
+              as={Link}
+              to="/ingredient-page"
+              onMouseEnter={() => setIsHovered3(true)}
+              onMouseLeave={() => setIsHovered3(false)}
+              style={{
+                color: isHovered3 ? "#794494" : "white",
+                fontSize: "1.3rem",
+                backgroundColor: isHovered3 ? "#F4E0FD" : "transparent",
+              }}
+            >
+              Ingredient Search
+            </Nav.Link>
+            {token ? (
+              <>
+                {/* Profile Link */}
+                <Nav.Link
+                  as={Link}
+                  to="/profile"
+                  onMouseEnter={() => setIsHovered4(true)}
+                  onMouseLeave={() => setIsHovered4(false)}
+                  style={{
+                    color: isHovered4 ? "#794494" : "white",
+                    fontSize: "1.3rem",
+                    backgroundColor: isHovered4 ? "#F4E0FD" : "transparent",
+                  }}
+                >
+                  Profile
+                </Nav.Link>
+                {/* Logout Link */}
+                <Nav.Link
+                  as={Link}
+                  to="#"
+                  onMouseEnter={() => setIsHovered5(true)}
+                  onMouseLeave={() => setIsHovered5(false)}
+                  style={{
+                    color: isHovered5 ? "#794494" : "white",
+                    fontSize: "1.3rem",
+                    backgroundColor: isHovered5 ? "#F4E0FD" : "transparent",
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault(); // Prevent navigation
+                    handleLogout(); // Call logout function
+                  }}
+                >
+                  Logout
+                </Nav.Link>
+              </>
+            ) : (
+              //Login Link
+              <Nav.Link
+                as={Link}
+                to="/login"
+                onMouseEnter={() => setIsHovered6(true)}
+                onMouseLeave={() => setIsHovered6(false)}
+                style={{
+                  color: isHovered6 ? "#794494" : "white",
+                  fontSize: "1.3rem",
+                  backgroundColor: isHovered6 ? "#F4E0FD" : "transparent",
+                }}
+              >
+                Login
+              </Nav.Link>
+            )}
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar >
   );
 };
 
-export default Nav;
+export default Navigation;

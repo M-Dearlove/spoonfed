@@ -9,10 +9,6 @@
   --border-color: #E2E8F0;
 }
 
-body {
-  background-color:var(--cream-bg);
-}
-
 .container {
   max-width: 1200px;
   margin: 0 auto;

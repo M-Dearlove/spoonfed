@@ -15,6 +15,8 @@ router.post('/login', async (req: Request, res: Response) => {
             where: { username },
         });
 
+        console.log('Found User:', user ? 'yes' : 'no');
+
         if (!user) {
             console.log('User not found:', username);
             return res.status(401).json({ message: 'Authentication failed' });
@@ -32,10 +34,17 @@ router.post('/login', async (req: Request, res: Response) => {
             return res.status(500).json({ message: 'Server configuration error' });
         }
 
-        const token = jwt.sign({ username }, jwtKey, { expiresIn: '1h' });
-        console.log('Login successful for user:', username);
+        const token = jwt.sign({ 
+            username,
+            userId: user.id 
+        }, jwtKey, { expiresIn: '1h' });
         
-        return res.json({ token });
+        console.log('Generated token payload:', { username, userId: user.id });
+        
+        return res.json({ 
+            token,
+            userId: user.id 
+        });
     } catch (error) {
         console.error('Login error:', error);
         return res.status(500).json({ message: 'Server error during login' });

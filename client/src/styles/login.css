@@ -1,0 +1,54 @@
+.login {
+  padding: 2rem;
+  max-width: 1200px;
+  background-color: #F4E0FD;
+  margin: 0 auto;
+  min-height: 700px;
+}
+
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.formContainer p {
+  color: #794494;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.form h1 {
+  color: #4D3957;
+}
+
+.form label {
+  color: #794494;
+}
+
+input.usernameForm {
+  background-color: white;
+  border: 2px solid #4D3957;
+  max-width: 400px;
+  max-height: 30px;
+  border-radius: 8px;
+}
+
+.passwordForm {
+  background-color: white;
+  max-width: 400px;
+  border-radius: 8px;
+  border-color: #4D3957;
+}
+
+.submit {
+  background-color: #4D3957;
+  color: white;
+  max-width: 100px;
+}

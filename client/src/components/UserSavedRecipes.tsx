@@ -1,175 +1,154 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Recipe } from '../interfaces/recipe';
+import React, { useState, useEffect } from 'react';
+import { Trash2 } from 'lucide-react';
+import Auth from '../utils/auth';
+import '../styles/UserSavedRecipes.css';
 
-const API_BASE_URL = 'http://localhost:3001/api/users';
+interface SavedRecipe {
+  id: number;
+  spoonacularId: string;
+  title: string;
+  imageUrl: string;
+  ingredients: string[];
+  instructions: string[];
+  sourceUrl: string;
+  matchingIngredients: string;
+}
 
-const SavedRecipes: React.FC = () => {
-  const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+const UserSavedRecipes: React.FC = () => {
+  const [recipes, setRecipes] = useState<SavedRecipe[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadSavedRecipes = async () => {
-    try {
-      const userId = localStorage.getItem('userId');
-      const token = localStorage.getItem('token');
-      
-      if (!userId || !token) {
-        throw new Error('No user ID or token found');
-      }
+  useEffect(() => {
+    const fetchSavedRecipes = async () => {
+      try {
+        const token = Auth.getToken();
+        if (!token) {
+          throw new Error('Please log in to view your saved recipes');
+        }
 
-      const response = await axios.get(
-        `${API_BASE_URL}/${userId}/saved-recipes`,
-        {
+        const response = await fetch('/api/recipes/saved', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch saved recipes');
         }
-      );
 
-      setSavedRecipes(response.data.savedRecipes || []);
-    } catch (error) {
-      console.error('Error loading recipes:', error);
-      if (axios.isAxiosError(error)) {
-        setError(error.response?.data?.message || 'Failed to load recipes');
-      } else {
-        setError('Failed to load recipes');
+        const data = await response.json();
+        setRecipes(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load saved recipes');
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  useEffect(() => {
-    loadSavedRecipes();
+    fetchSavedRecipes();
   }, []);
 
-  const handleClearRecipes = async () => {
+  const handleDeleteRecipe = async (recipeId: number) => {
+    if (!confirm('Are you sure you want to remove this recipe?')) {
+      return;
+    }
+
     try {
-      const userId = localStorage.getItem('userId');
-      const token = localStorage.getItem('token');
-      
-      if (!userId || !token) {
-        throw new Error('No user ID or token found');
-      }
-
-      // Assuming you have an endpoint to clear all saved recipes
-      await axios.delete(
-        `${API_BASE_URL}/${userId}/saved-recipes`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+      const token = Auth.getToken();
+      const response = await fetch(`/api/recipes/saved/${recipeId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-      );
+      });
 
-      setSavedRecipes([]);
-    } catch (error) {
-      console.error('Failed to clear recipes:', error);
-      if (axios.isAxiosError(error)) {
-        setError(error.response?.data?.message || 'Failed to clear recipes');
-      } else {
-        setError('Failed to clear recipes');
+      if (!response.ok) {
+        throw new Error('Failed to delete recipe');
       }
+
+      setRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete recipe');
     }
   };
 
-  const handleRemoveRecipe = async (recipeId: string) => {
-    try {
-      const userId = localStorage.getItem('userId');
-      const token = localStorage.getItem('token');
-      
-      if (!userId || !token) {
-        throw new Error('No user ID or token found');
-      }
-
-      await axios.delete(
-        `${API_BASE_URL}/${userId}/saved-recipes/${recipeId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
-      setSavedRecipes(current => current.filter(recipe => recipe.id !== recipeId));
-    } catch (error) {
-      console.error('Failed to remove recipe:', error);
-      if (axios.isAxiosError(error)) {
-        setError(error.response?.data?.message || 'Failed to remove recipe');
-      } else {
-        setError('Failed to remove recipe');
-      }
-    }
-  };
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="saved-recipes-page">
+        <div className="loading-container">
+          <p>Loading your saved recipes...</p>
+        </div>
       </div>
     );
   }
 
-  if (savedRecipes.length === 0) {
+  if (error) {
     return (
-      <div className="text-center p-6">
-        No recipes have been saved yet
+      <div className="saved-recipes-page">
+        <div className="error-message">
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (recipes.length === 0) {
+    return (
+      <div className="saved-recipes-page">
+        <div className="empty-state">
+          <p className="empty-title">You haven't saved any recipes yet!</p>
+          <p className="empty-subtitle">
+            Browse recipes and click "Save Recipe" to add them to your collection.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Saved Recipes</h1>
-        <button
-          onClick={handleClearRecipes}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-        >
-          Clear All
-        </button>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">
-          <p>{error}</p>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {savedRecipes.map(recipe => (
-          <div 
-            key={recipe.id} 
-            className="border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
-          >
-            <img 
-              src={recipe.image} 
-              alt={recipe.title} 
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h2 className="text-xl font-bold mb-2">{recipe.title}</h2>
+    <div className="saved-recipes-page">
+      <div className="saved-recipes-container">
+        <h1 className="page-title">My Saved Recipes</h1>
+        
+        <div className="recipes-grid">
+          {recipes.map((recipe) => (
+            <div key={recipe.id} className="recipe-card">
+              <div className="recipe-image-container">
+                <img
+                  src={recipe.imageUrl}
+                  alt={recipe.title}
+                  className="recipe-image"
+                />
+              </div>
               
-              <div className="flex justify-between items-center mt-4">
-                <span className="text-sm text-gray-600">
-                  Food Group: {recipe.foodGroup || 'Unspecified'}
-                </span>
-                <button
-                  onClick={() => handleRemoveRecipe(recipe.id)}
-                  className="p-2 bg-red-100 text-red-600 rounded-full hover:bg-red-200"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </button>
+              <div className="recipe-content">
+                <h3 className="recipe-title">{recipe.title}</h3>
+
+                <div className="recipe-actions">
+                  <a
+                    href={recipe.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="view-recipe-btn"
+                  >
+                    View Full Recipe
+                  </a>
+                  <button
+                    onClick={() => handleDeleteRecipe(recipe.id)}
+                    className="delete-recipe-btn"
+                    title="Remove recipe"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
 };
 
-export default SavedRecipes;
+export default UserSavedRecipes;

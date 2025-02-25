@@ -6,16 +6,22 @@ interface UserAttributes {
     id: number;
     username: string;
     password: string;
+    name: string | null;
+    email: string | null;
+    bio: string | null;
 }
 
 // sets id as optional
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'name' | 'email' | 'bio'> {}
 
 export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
     public id!: number;
     public username!: string;
     public password!: string;
-  savedRecipes: any;
+    public name!: string | null;
+    public email!: string | null;
+    public bio!: string | null;
+    public savedRecipes: any;
 
     // hashes the password prior to database storage for security.
     public async hashPassword(password: string) {
@@ -40,6 +46,18 @@ export function UserGenerator(sequelize: Sequelize): typeof User {
             password: {
                 type: DataTypes.STRING,
                 allowNull: false,
+            },
+            name: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
+            email: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
+            bio: {
+                type: DataTypes.TEXT,
+                allowNull: true,
             },
         },
         {

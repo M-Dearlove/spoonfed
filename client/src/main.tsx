@@ -16,7 +16,6 @@ import UserProfile from "./pages/UserProfile";
 import Dashboard from "./pages/dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register.tsx";
-import "./styles/style.css";
 import IngredientsPage from "./pages/Ingredientspage.tsx";
 
 const router = createBrowserRouter([

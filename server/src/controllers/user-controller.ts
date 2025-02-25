@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { User } from '../models/user.js';
+import { SavedRecipe } from '../models/Recipe.js';
 
 // GET /Users/:id
 export const getUserById = async (req: Request, res: Response) => {
@@ -31,39 +32,35 @@ export const getUserById = async (req: Request, res: Response) => {
     }
   };
   // POST /Users/save-recipe
-export const saveRecipe = async (req: Request, res: Response) => {
-  try {
-    const { userId, recipe } = req.body;
-
-    // Find the user
-    const user = await User.findByPk(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+  export const saveRecipe = async (req: Request, res: Response) => {
+    try {
+      const { userId, recipe } = req.body;
+  
+      // Find the user
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Create new saved recipe
+      const savedRecipe = await SavedRecipe.create({
+        userId: userId,
+        spoonacularId: recipe.id,
+        title: recipe.title,
+        imageUrl: recipe.image,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
+        sourceUrl: recipe.sourceUrl,
+        matchingIngredients: recipe.matchingIngredients
+      });
+  
+      return res.status(200).json({ 
+        message: 'Recipe saved successfully',
+        recipe: savedRecipe
+      });
+  
+    } catch (error) {
+      console.error('Error saving recipe:', error);
+      return res.status(500).json({ message: 'Internal server error' });
     }
-
-    // Retrieve existing saved recipes
-    const savedRecipes = user.savedRecipes ? JSON.parse(user.savedRecipes) : [];
-    
-    // Check for duplicates
-    const isDuplicate = savedRecipes.some((saved: any) => saved.id === recipe.id);
-    if (isDuplicate) {
-      return res.status(400).json({ message: 'Recipe already saved' });
-    }
-
-    // Add new recipe
-    const updatedSavedRecipes = [...savedRecipes, recipe];
-
-    // Update user profile
-    user.savedRecipes = JSON.stringify(updatedSavedRecipes);
-    await user.save();
-
-    return res.status(200).json({ 
-      message: 'Recipe saved successfully',
-      savedRecipesCount: updatedSavedRecipes.length
-    });
-
-  } catch (error) {
-    console.error('Error saving recipe:', error);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-};
+  };

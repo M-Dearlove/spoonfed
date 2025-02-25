@@ -1,45 +1,53 @@
-const forceDatabaseRefresh = false;
-
 import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
 import routes from "./routes/index.js";
 import { sequelize } from "./models/index.js";
-import { authenticateToken } from "./middleware/auth.js";
 import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use((req, res, next) => {
-  console.log(`Incoming request to: ${req.method} ${req.path}`);
-  next();
-});
-
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  console.log("Request body:", req.body);
-  next();
-});
-
+// Middleware order is important
 app.use(express.json());
-app.use(routes);
 
-// Serves static files in the entire client's dist folder
-app.use(express.static("../client/dist"));
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
-sequelize.sync({ force: forceDatabaseRefresh }).then(() => {
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  console.log('Headers:', req.headers);
+  next();
+});
+
+// Mount all routes
+app.use('/', routes);
+
+// Test route at server level
+app.get('/server-test', (req, res) => {
+  res.json({ message: 'Server is working' });
+});
+
+// Error handling
+app.use((err: any, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// Start server
+sequelize.sync({ force: false }).then(() => {
   app.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}`);
+    console.log('Available test routes:');
+    console.log('- /server-test');
+    console.log('- /test');
+    console.log('- /api/test');
+    console.log('- /api/profile/test');
   });
 });
