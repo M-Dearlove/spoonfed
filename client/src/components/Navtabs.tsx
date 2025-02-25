@@ -3,7 +3,7 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Container from "react-bootstrap/Container";
 import { useState } from "react";
-import "src/styles/navtabs.css";
+import "../styles/navtabs.css";
 
 const Navigation = () => {
   const [isHovered, setIsHovered] = useState(false);
