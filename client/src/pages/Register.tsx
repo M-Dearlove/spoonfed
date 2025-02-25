@@ -3,6 +3,8 @@ import { registerUser } from "../api/userAPI";
 import Auth from "../utils/auth";
 import { login } from "../api/authAPI";
 import LoginModal from "../components/loginModal";
+import "../styles/register.css";
+
 interface RegisterData {
   username: string;
   password: string;
@@ -67,7 +69,7 @@ const Register = () => {
       }
 
       Auth.login(loginResponse.token, registerData.username);
-     
+
     } catch (err) {
       console.error("Registration/Login error:", err);
       setError(
@@ -76,39 +78,44 @@ const Register = () => {
     }
   };
   return (
-    <div className="container">
-      <form className="form" onSubmit={handleSubmit}>
-        <h1>Create Account</h1>
-        {error && <div className="error-message">{error}</div>}
-        <label>Username</label>
-        <input
-          type="text"
-          name="username"
-          value={registerData.username}
-          onChange={handleChange}
-        />
-        <label>Password</label>
-        <input
-          type="password"
-          name="password"
-          value={registerData.password}
-          onChange={handleChange}
-        />
-        <label>Confirm Password</label>
-        <input
-          type="password"
-          name="confirmPassword"
-          value={registerData.confirmPassword}
-          onChange={handleChange}
-        />
-        <button onClick={() => setModalShow(true)} type="submit">Register</button>
-        <LoginModal
-          show={modalShow}
-          onHide={() => setModalShow(false)}
-          size="lg"
-          centered
-        />
-      </form>
+    <div className="register">
+      <div className="registerContainer">
+        <form className="form" onSubmit={handleSubmit}>
+          <h1>Create Account</h1>
+          {error && <div className="error-message">{error}</div>}
+          <label>Username</label>
+          <input
+            className="usernameForm"
+            type="text"
+            name="username"
+            value={registerData.username}
+            onChange={handleChange}
+          />
+          <label>Password</label>
+          <input
+            className="passwordForm"
+            type="password"
+            name="password"
+            value={registerData.password}
+            onChange={handleChange}
+          />
+          <label>Confirm Password</label>
+          <input
+            className="passwordForm"
+            type="password"
+            name="confirmPassword"
+            value={registerData.confirmPassword}
+            onChange={handleChange}
+          />
+          <button onClick={() => setModalShow(true)} className="submit" type="submit">Register</button>
+          <LoginModal
+            show={modalShow}
+            onHide={() => setModalShow(false)}
+            size="lg"
+            centered
+          />
+        </form>
+      </div>
     </div>
   );
 };

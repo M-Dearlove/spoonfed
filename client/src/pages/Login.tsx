@@ -1,7 +1,7 @@
 import { useState, FormEvent, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import Auth from "../utils/auth.js";
-import "../index.css";
+import "../styles/login.css";
 import { login } from "../api/authAPI";
 import LoginModal from "../components/loginModal.js";
 interface LoginData {
@@ -37,36 +37,40 @@ const Login = () => {
     }
   };
   return (
-    <div className="container">
-      <form className="form" onSubmit={handleSubmit}>
-        <h1>Login</h1>
-        <label>Username</label>
-        <input
-          type="text"
-          name="username"
-          value={loginData.username}
-          onChange={handleChange}
-        />
-        <label>Password</label>
-        <input
-          type="password"
-          name="password"
-          value={loginData.password}
-          onChange={handleChange}
-        />
+    <div className="login">
+      <div className="formContainer">
+        <form className="form" onSubmit={handleSubmit}>
+          <h1>Login</h1>
+          <label>Username</label>
+          <input
+            className="usernameForm"
+            type="text"
+            name="username"
+            value={loginData.username}
+            onChange={handleChange}
+          />
+          <label>Password</label>
+          <input
+            className="passwordForm"
+            type="password"
+            name="password"
+            value={loginData.password}
+            onChange={handleChange}
+          />
 
-        <button onClick={() => setModalShow(true)} className="submit" type="submit">Login</button>
-        <LoginModal
-          show={modalShow}
-          onHide={() => setModalShow(false)}
-          size="lg"
-          centered
-        />
+          <button onClick={() => setModalShow(true)} className="submit" type="submit">Login</button>
+          <LoginModal
+            show={modalShow}
+            onHide={() => setModalShow(false)}
+            size="lg"
+            centered
+          />
 
-      </form>
-      <p className="register">
-        Don't have an account? <Link to="/register"> Register here</Link>
-      </p>
+        </form>
+        <p className="register">
+          Don't have an account? <Link to="/register"> Register here</Link>
+        </p>
+      </div>
     </div>
   );
 };

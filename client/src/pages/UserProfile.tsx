@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import UserSavedRecipes from '../components/UserSavedRecipes';
 import '../styles/userprofile.css';
-
-interface UserPreferences {
-  dietaryRestrictions: string[];
-  favoritesCuisines: string[];
-  cookingSkillLevel: string;
-}
+import Auth from '../utils/auth';
+import { getUserPreferences, updateUserPreferences, type UserPreferences } from '../api/userPreferencesAPI';
+import { getUserProfile, updateUserProfile } from '../api/userProfileAPI';
 
 interface UserProfile {
   name: string;
@@ -32,7 +29,6 @@ const DIETARY_RESTRICTIONS = [
 ];
 
 const UserProfilePage: React.FC = () => {
-  const userId = localStorage.getItem('userId') || '';
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
     name: '',
@@ -44,39 +40,82 @@ const UserProfilePage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedProfile = localStorage.getItem(`userProfile_${userId}`);
-    if (savedProfile) {
-      setProfile(JSON.parse(savedProfile));
-    }
-  }, [userId]);
+    const fetchPreferences = async () => {
+      try {
+        if (Auth.loggedIn()) {
+          const [userProfile, userPreferences] = await Promise.all([
+            getUserProfile(), 
+            getUserPreferences()
+          ]);
 
-  const handleSaveProfile = () => {
+          setProfile({
+            name: userProfile.name || '',
+            email: userProfile.email || '',
+            bio: userProfile.bio || '',
+            preferences: userPreferences
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch preferences:', error);
+        setErrorMessage('Failed to load preferences');
+      }
+    };
+
+    fetchPreferences();
+  }, []);
+
+  const handleSaveProfile = async () => {
     try {
-      localStorage.setItem(`userProfile_${userId}`, JSON.stringify(profile));
-      setIsEditing(false);
-      setSuccessMessage('Profile updated successfully!');
-      setTimeout(() => setSuccessMessage(null), 3000);
+      if (Auth.loggedIn()) {
+        // Save both profile info and preferences
+        await Promise.all([
+          updateUserProfile({
+            name: profile.name,
+            email: profile.email,
+            bio: profile.bio,
+          }),
+          updateUserPreferences(profile.preferences)
+        ]);
+  
+        setIsEditing(false);
+        setSuccessMessage('Profile updated successfully!');
+        setTimeout(() => setSuccessMessage(null), 3000);
+      }
     } catch (error) {
+      console.error('Failed to save profile:', error);
       setErrorMessage('Failed to save profile');
       setTimeout(() => setErrorMessage(null), 3000);
     }
   };
 
-  const handlePreferenceChange = (
+  const handlePreferenceChange = async (
     category: keyof UserPreferences,
     value: string | string[]
   ) => {
+    const newPreferences = {
+      ...profile.preferences,
+      [category]: value
+    };
+    
     setProfile(prev => ({
       ...prev,
-      preferences: {
-        ...prev.preferences,
-        [category]: value
-      }
+      preferences: newPreferences
     }));
+  
+    // Auto-save preferences when they change
+    try {
+      await updateUserPreferences(newPreferences);
+      setSuccessMessage('Preferences updated successfully!');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error) {
+      console.error('Failed to save preferences:', error);
+      setErrorMessage('Failed to save preferences');
+      setTimeout(() => setErrorMessage(null), 3000);
+    }
   };
 
   return (
-    <div className="profile-container">
+    <div className="profile">
       <div className="profile-header">
         <div className="profile-avatar">
           <div className="profile-avatar-icon" style={{ width: 40, height: 40, backgroundColor: "#4A5568" }} />
@@ -211,7 +250,7 @@ const UserProfilePage: React.FC = () => {
             <h2 className="section-title">My Saved Recipes</h2>
           </div>
           <div className="section-content">
-            {userId ? (
+            {Auth.loggedIn() ? (
               <UserSavedRecipes />
             ) : (
               <p>Please log in to see your saved recipes</p>
