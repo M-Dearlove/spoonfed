@@ -7,13 +7,13 @@ import { sequelize } from "./models/index.js";
 import cors from "cors";
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT || "3001", 10);
 
 // Middleware order is important
 app.use(express.json());
 
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: [process.env.DB_URL || "http://localhost:3000", "https://spoonfed-prod.onrender.com"],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -41,13 +41,16 @@ app.use((err: any, _req: express.Request, res: express.Response, next: express.N
 });
 
 // Start server
-sequelize.sync({ force: false }).then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is listening on port ${PORT}`);
-    console.log('Available test routes:');
-    console.log('- /server-test');
-    console.log('- /test');
-    console.log('- /api/test');
-    console.log('- /api/profile/test');
+sequelize.sync({ force: false })
+  .then(() => {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server is listening on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('Failed to connect to database:', err);
+    // Start server anyway, so at least the web part works
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server is listening on port ${PORT} (without database)`);
+    });
   });
-});
