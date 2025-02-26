@@ -12,6 +12,8 @@ const PORT = parseInt(process.env.PORT || "3001", 10);
 // Middleware order is important
 app.use(express.json());
 
+app.use(express.static("../client/dist"));
+
 app.use(cors({
   origin: [process.env.DB_URL || "http://localhost:3000", "https://spoonfed-prod.onrender.com"],
   credentials: true,
