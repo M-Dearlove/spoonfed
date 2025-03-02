@@ -291,13 +291,15 @@
 .search-bar {
   flex: 1;
   border-radius: 0.5rem 0 0 0.5rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid #794494;
+  color: #794494;
+  background-color: white;
   padding: 0.75rem 1rem;
   font-size: 1rem;
 }
 
 .add-ingredient-button {
-  background-color: var(--primary-teal);
+  background-color: #4D3957;
   color: white;
   border: none;
   border-radius: 0 0.5rem 0.5rem 0;
@@ -308,7 +310,7 @@
 }
 
 .add-ingredient-button:hover {
-  background-color: #248277;
+  background-color: #794494;
 }
 
 .add-ingredient-button:disabled {
