@@ -85,6 +85,33 @@ export const IngredientsPage: React.FC = () => {
     }
   };
 
+  const addCustomIngredient = () => {
+    if (!searchTerm.trim()) {
+      return;
+    }
+    
+    // Capitalize first letter of each word for consistency
+    const formattedIngredient = searchTerm.trim().split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+    
+    setSelectedIngredients(prev => {
+      const newSet = new Set(prev);
+      newSet.add(formattedIngredient);
+      return newSet;
+    });
+    
+    // Clear search field after adding
+    setSearchTerm('');
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addCustomIngredient();
+    }
+  };
+
   const searchRecipes = useCallback(async () => {
     if (selectedIngredients.size === 0) {
       setError('Please select at least one ingredient');
@@ -203,19 +230,37 @@ export const IngredientsPage: React.FC = () => {
     }
   };
 
+  const removeSelectedIngredient = (ingredient: string) => {
+    setSelectedIngredients(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(ingredient);
+      return newSet;
+    });
+  };
+
   return (
     <div className="ingredients-page">
       <div className="ingredients-container">
         <h1 className="page-title">Ingredients Library</h1>
 
         <div className="search-container">
-          <input
-            type="text"
-            placeholder="Search ingredients..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-bar"
-          />
+          <div className="search-input-group">
+            <input
+              type="text"
+              placeholder="Search or type your own ingredient..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              className="search-bar"
+            />
+            <button 
+              onClick={addCustomIngredient}
+              className="add-ingredient-button"
+              disabled={!searchTerm.trim()}
+            >
+              Add Ingredient
+            </button>
+          </div>
 
           <div className="search-actions">
             <span className="selected-count">
@@ -234,6 +279,27 @@ export const IngredientsPage: React.FC = () => {
         {error && (
           <div className="error-message">
             {error}
+          </div>
+        )}
+
+        {/* Display selected ingredients */}
+        {selectedIngredients.size > 0 && (
+          <div className="selected-ingredients-container">
+            <h3 className="selected-ingredients-title">Selected Ingredients:</h3>
+            <div className="selected-ingredients-tags">
+              {Array.from(selectedIngredients).map((ingredient) => (
+                <div key={ingredient} className="ingredient-tag">
+                  {ingredient}
+                  <button
+                    onClick={() => removeSelectedIngredient(ingredient)}
+                    className="remove-ingredient"
+                    aria-label={`Remove ${ingredient}`}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
