@@ -1,6 +1,6 @@
 // src/pages/IngredientsPage.tsx
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Recipe } from '../interfaces/recipe';
 import { IngredientCard } from '../components/IngredientCard';
@@ -11,15 +11,9 @@ import Auth from '../utils/auth';
 const SPOONACULAR_API_KEY = 'e2537b3be41447b78c479963501a884b';
 const SPOONACULAR_BASE_URL = 'https://api.spoonacular.com/recipes';
 
-// Keeping your comprehensive ingredient list
-const allIngredients = [
-  // Proteins
-  'Chicken Breasts', 'Beef Tenderloin', 'Pork Shoulder', 'Turkey Breast', 'Leg of Lamb',
-  'Salmon', 'Tuna', 'Shrimp', 'Tofu', 'Egg',
-];
-
 const ingredientCategories = {
-
+  Proteins: ['Chicken Breasts', 'Beef Tenderloin', 'Pork Shoulder', 'Turkey Breast', 'Leg of Lamb',
+    'Salmon', 'Tuna', 'Shrimp', 'Tofu', 'Egg'],
   Vegetables: ['Tomato', 'White Onion', 'Garlic', 'Green Bell Pepper', 'Spinach', 'Broccoli', 'Carrots', 'Zucchini'],
   Fruits: ['Apple', 'Bananas', 'Orange', 'Strawberries', 'Blueberries', 'Raspberries', 'Pineapple'],
   Grains: ['Long-Grain Rice', 'Quinoa', 'Pearl Barley', 'Steel Cut Oats', 'Sourdough Bread', 'Pasta', 'Couscous'],
@@ -36,7 +30,6 @@ const ingredientCategories = {
   Drinks: ['Coffee', 'Tea', 'Soda', 'Juice', 'Milk', 'Water'],
   Alcohol: ['Beer', 'Wine', 'Vodka', 'Whiskey', 'Rum', 'Tequila'],
   Miscellaneous: ['Honey', 'Maple Syrup', 'Vinegar', 'Soy Milk', 'Coconut Water', 'Nutritional Yeast'],
-
 };
 
 interface DecodedToken {
@@ -179,12 +172,6 @@ export const IngredientsPage: React.FC = () => {
     }
   }, [selectedIngredients]);
 
-  const filteredIngredients = useMemo(() => {
-    return allIngredients.filter(ingredient =>
-      ingredient.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm]);
-
   const stripHtmlTags = (html: string) => {
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
@@ -303,21 +290,6 @@ export const IngredientsPage: React.FC = () => {
           </div>
         )}
 
-        <div className="firstCategory">
-          <p>Proteins</p>
-          <div className="ingredients-grid">
-            {filteredIngredients.map((ingredient, index) => (
-              <IngredientCard
-                key={index}
-                ingredient={ingredient}
-                isSelected={selectedIngredients.has(ingredient)}
-                onNavigate={() => handleIngredientInteraction(ingredient, 'navigate')}
-                onSelect={() => handleIngredientInteraction(ingredient, 'select')}
-              />
-            ))}
-          </div>
-        </div>
-
         {recipes.length > 0 && (
           <div className="recipes-grid">
             {recipes.map((recipe) => (
@@ -357,24 +329,32 @@ export const IngredientsPage: React.FC = () => {
           </div>
         )}
 
-        {Object.entries(ingredientCategories).map(([category, ingredients]) => (
-          <div key={category} className="category-section">
-            <h2 className="category-title">
-              {category.replace(/([A-Z])/g, ' $1').trim()}
-            </h2>
-            <div className="ingredients-grid">
-              {ingredients.map((ingredient, index) => (
-                <IngredientCard
-                  key={index}
-                  ingredient={ingredient}
-                  isSelected={selectedIngredients.has(ingredient)}
-                  onNavigate={() => handleIngredientInteraction(ingredient, 'navigate')}
-                  onSelect={() => handleIngredientInteraction(ingredient, 'select')}
-                />
-              ))}
+        {/* Render each category with filtering applied */}
+        {Object.entries(ingredientCategories).map(([category, ingredients]) => {
+          const filteredCategoryIngredients = ingredients.filter(ingredient =>
+            ingredient.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+          
+          // Only render categories that have matching ingredients or if there's no search term
+          return filteredCategoryIngredients.length > 0 || !searchTerm ? (
+            <div key={category} className="category-section">
+              <h2 className="category-title">
+                {category}
+              </h2>
+              <div className="ingredients-grid">
+                {filteredCategoryIngredients.map((ingredient, index) => (
+                  <IngredientCard
+                    key={index}
+                    ingredient={ingredient}
+                    isSelected={selectedIngredients.has(ingredient)}
+                    onNavigate={() => handleIngredientInteraction(ingredient, 'navigate')}
+                    onSelect={() => handleIngredientInteraction(ingredient, 'select')}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ) : null;
+        })}
       </div>
     </div>
   );
