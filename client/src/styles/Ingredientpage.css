@@ -302,8 +302,8 @@
   background-color: #4D3957;
   color: white;
   border: none;
-  border-radius: 0 0.5rem 0.5rem 0;
-  padding: 0 1.25rem;
+  border-radius: 0.5rem 0.5rem 0.5rem 0.5rem;
+  padding: 0 1.50rem;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
