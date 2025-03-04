@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import RecipeDisplay from "../components/aiRecipeCard";
 import Hero from "../components/aiHero";
-import "./App.css";
 
 // Define types for recipe data and event stream
 interface RecipeData {
