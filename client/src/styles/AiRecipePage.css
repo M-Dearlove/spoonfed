@@ -1,0 +1,10 @@
+.recipe-page {
+    min-height: 100vh;
+    background-color: #F4E0FD;
+  }
+  
+  .recipe-display-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }

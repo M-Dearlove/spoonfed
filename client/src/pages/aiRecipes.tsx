@@ -1,41 +1,69 @@
 import React, { useState, useRef, useEffect } from "react";
 import RecipeDisplay from "../components/aiRecipeCard";
 import Hero from "../components/aiHero";
+import "./AiRecipePage.css";
 
-// Define types for recipe data and event stream
-interface RecipeData {
-  [key: string]: string | number | boolean; // You can adjust this depending on the exact structure of the data
+// Define RecipeFormData interface locally to match the one in aiHero.tsx
+interface RecipeFormData {
+  ingredients: string;
+  mealType: string;
+  cuisine: string;
+  cookingTime: string;
+  complexity: string;
+  people: string;
+  note: string;
 }
 
+// Define types for recipe data
+interface RecipeData {
+  [key: string]: string | number | boolean;
+}
+
+// Define type for event data
+interface RecipeStreamEvent {
+  action?: string;
+  chunk?: string;
+}
+
+/**
+ * AI Recipe Page Component
+ */
 const AiRecipePage: React.FC = () => {
   const [recipeData, setRecipeData] = useState<RecipeData | null>(null);
   const [recipeText, setRecipeText] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   
   const eventSourceRef = useRef<EventSource | null>(null);
-  const recipeDisplayRef = useRef<HTMLDivElement | null>(null); // Reference to RecipeDisplay
+  const recipeDisplayRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     return () => closeEventStream();
   }, []);
 
   useEffect(() => {
-    if (recipeData) { 
+    if (recipeData) {
       closeEventStream();
       initializeEventStream();
-      recipeDisplayRef.current?.scrollIntoView({ behavior: "smooth" }); // Scroll into view on recipe data change
+      // Scroll into view on recipe data change
+      recipeDisplayRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [recipeData]);
 
-  const initializeEventStream = () => {
+  const initializeEventStream = (): void => {
     if (!recipeData) return;
 
-    const queryParams = new URLSearchParams(recipeData as Record<string, string>).toString();
-    const url = `https://recipegenerator-n26b.onrender.com/recipeStream?${queryParams}`;
-    eventSourceRef.current = new EventSource(url);
+    const queryParams = new URLSearchParams();
+    Object.entries(recipeData).forEach(([key, value]) => {
+      queryParams.append(key, String(value));
+    });
 
+    const url = `https://recipegenerator-n26b.onrender.com/recipeStream?${queryParams.toString()}`;
+    
+    eventSourceRef.current = new EventSource(url);
+    
     eventSourceRef.current.onmessage = (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
+      const data: RecipeStreamEvent = JSON.parse(event.data);
+      
       if (data.action === 'close') {
         closeEventStream();
       } else if (data.chunk) {
@@ -50,24 +78,31 @@ const AiRecipePage: React.FC = () => {
     };
   };
 
-  const closeEventStream = () => {
-    if (eventSourceRef.current) eventSourceRef.current.close();
+  const closeEventStream = (): void => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
   };
 
-  const handleRecipeSubmit = (data: RecipeData) => {
+  // Modified to accept RecipeFormData instead of FormData
+  const handleRecipeSubmit = (formData: RecipeFormData): void => {
+    const data: RecipeData = {};
+    Object.entries(formData).forEach(([key, value]) => {
+      data[key] = value;
+    });
     setRecipeData(data);
     setRecipeText(''); // Clear previous recipe text
     setError(null); // Clear previous error
   };
 
   return (
-    <div className="bg-gray-100">
+    <div className="recipe-page">
       <Hero onRecipeSubmit={handleRecipeSubmit} />
-      <div ref={recipeDisplayRef}> {/* Add reference here */}
+      <div ref={recipeDisplayRef} className="recipe-display-container">
         <RecipeDisplay error={error} recipeText={recipeText} />
       </div>
     </div>
   );
-}
+};
 
 export default AiRecipePage;
