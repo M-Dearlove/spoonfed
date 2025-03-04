@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import RecipeDisplay from "../components/aiRecipeCard";
 import Hero from "../components/aiHero";
-import "./AiRecipePage.css";
+import "../styles/AiRecipePage.css";
 
 // Define RecipeFormData interface locally to match the one in aiHero.tsx
 interface RecipeFormData {
