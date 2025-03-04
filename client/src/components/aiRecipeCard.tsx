@@ -1,6 +1,6 @@
 import React from "react";
 import { jsPDF } from "jspdf";
-import "./aiRecipeCard.css";
+import "../styles/aiRecipeCard.css";
 
 interface RecipeDisplayProps {
   error?: string | null;

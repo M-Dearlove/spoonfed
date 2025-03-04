@@ -1,11 +1,11 @@
 import React, { useState, ChangeEvent } from "react";
 import image_hero from "../../public/images/spoonfed.jpg";
-import "./aiHero.css";
+import "../styles/aiHero.css";
 
 /**
  * Interface for form data
  */
-interface FormData {
+interface RecipeFormData {
   ingredients: string;
   mealType: string;
   cuisine: string;
@@ -19,14 +19,14 @@ interface FormData {
  * Props for RecipeCard component
  */
 interface RecipeCardProps {
-  onSubmit: (formData: FormData) => void;
+  onSubmit: (formData: RecipeFormData) => void;
 }
 
 /**
  * RecipeCard component for generating recipes
  */
 const RecipeCard: React.FC<RecipeCardProps> = ({ onSubmit }) => {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<RecipeFormData>({
     ingredients: "",
     mealType: "",
     cuisine: "",
@@ -169,7 +169,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ onSubmit }) => {
  * Props for Hero component
  */
 interface HeroProps {
-  onRecipeSubmit: (formData: FormData) => void;
+  onRecipeSubmit: (formData: RecipeFormData) => void;
 }
 
 /**
