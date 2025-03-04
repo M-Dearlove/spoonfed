@@ -1,37 +1,46 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion"; // Import motion from framer-motion
+import React, { useState, ChangeEvent } from "react";
 import image_hero from "../../public/images/spoonfed.jpg";
+import "./aiHero.css";
 
-interface RecipeCardProps {
-  onSubmit: (formData: {
-    ingredients: string;
-    mealType: string;
-    cuisine: string;
-    cookingTime: string;
-    complexity: string;
-    people: string;
-    note: string;
-  }) => void;
+/**
+ * Interface for form data
+ */
+interface FormData {
+  ingredients: string;
+  mealType: string;
+  cuisine: string;
+  cookingTime: string;
+  complexity: string;
+  people: string;
+  note: string;
 }
 
+/**
+ * Props for RecipeCard component
+ */
+interface RecipeCardProps {
+  onSubmit: (formData: FormData) => void;
+}
+
+/**
+ * RecipeCard component for generating recipes
+ */
 const RecipeCard: React.FC<RecipeCardProps> = ({ onSubmit }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     ingredients: "",
     mealType: "",
     cuisine: "",
     cookingTime: "",
     complexity: "",
     people: "",
-    note: "", // New note field
+    note: "",
   });
 
-  type FormDataKey = keyof typeof formData;
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (): void => {
     if (
       !formData.ingredients ||
       !formData.mealType ||
@@ -47,119 +56,151 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="flex flex-col gap-2 bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="flex justify-center text-2xl font-semibold text-gray-800 mb-4">Recipe Generator</h2>
-      <div className="space-y-4">
-        {[
-          { label: "Ingredients", id: "ingredients", type: "text", placeholder: "e.g., chicken, rice" },
-          { label: "Meal Type", id: "mealType", type: "select", options: ["Breakfast", "Lunch", "Dinner", "Snack"] },
-          { label: "Cuisine", id: "cuisine", type: "text", placeholder: "e.g., Italian, Mexican" },
-          { label: "Cooking Time", id: "cookingTime", type: "select", options: ["< 30 mins", "30-60 mins", "> 1 hour"] },
-          { label: "Complexity", id: "complexity", type: "select", options: ["Beginner", "Intermediate", "Advanced"] },
-          { label: "Number of People", id: "people", type: "number", placeholder: "e.g., 4" }
-        ].map(({ label, id, type, options, placeholder }) => (
-          <div key={id}>
-            <label className="block text-gray-700 font-medium mb-1" htmlFor={id}>{label}</label>
-            {type === "select" ? (
-              <select
-                id={id}
-                value={formData[id as FormDataKey]}
-                onChange={handleChange}
-                className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-              >
-                <option value="">Select {label.toLowerCase()}</option>
-                {options && options.map((option) => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-            ) : (
-              <input
-                id={id}
-                type={type}
-                placeholder={placeholder}
-                value={formData[id as FormDataKey]}
-                onChange={handleChange}
-                className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-              />
-            )}
-          </div>
-        ))}
-        <div>
-          <label className="block text-gray-700 font-medium mb-1" htmlFor="note">Note (Optional)</label>
+    <div className="recipe-card">
+      <h2 className="recipe-card-title">Recipe Generator</h2>
+      <div className="recipe-card-form">
+        <div className="form-field">
+          <label htmlFor="ingredients">Ingredients</label>
+          <input
+            id="ingredients"
+            type="text"
+            placeholder="e.g., chicken, rice"
+            value={formData.ingredients}
+            onChange={handleChange}
+            className="form-input"
+          />
+        </div>
+        
+        <div className="form-field">
+          <label htmlFor="mealType">Meal Type</label>
+          <select
+            id="mealType"
+            value={formData.mealType}
+            onChange={handleChange}
+            className="form-select"
+          >
+            <option value="">Select meal type</option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Dinner">Dinner</option>
+            <option value="Snack">Snack</option>
+          </select>
+        </div>
+        
+        <div className="form-field">
+          <label htmlFor="cuisine">Cuisine</label>
+          <input
+            id="cuisine"
+            type="text"
+            placeholder="e.g., Italian, Mexican"
+            value={formData.cuisine}
+            onChange={handleChange}
+            className="form-input"
+          />
+        </div>
+        
+        <div className="form-field">
+          <label htmlFor="cookingTime">Cooking Time</label>
+          <select
+            id="cookingTime"
+            value={formData.cookingTime}
+            onChange={handleChange}
+            className="form-select"
+          >
+            <option value="">Select cooking time</option>
+            <option value="< 30 mins">{"< 30 mins"}</option>
+            <option value="30-60 mins">30-60 mins</option>
+            <option value="> 1 hour">{"> 1 hour"}</option>
+          </select>
+        </div>
+        
+        <div className="form-field">
+          <label htmlFor="complexity">Complexity</label>
+          <select
+            id="complexity"
+            value={formData.complexity}
+            onChange={handleChange}
+            className="form-select"
+          >
+            <option value="">Select complexity</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+        </div>
+        
+        <div className="form-field">
+          <label htmlFor="people">Number of People</label>
+          <input
+            id="people"
+            type="number"
+            placeholder="e.g., 4"
+            value={formData.people}
+            onChange={handleChange}
+            className="form-input"
+          />
+        </div>
+        
+        <div className="form-field">
+          <label htmlFor="note">Note (Optional)</label>
           <input
             id="note"
             type="text"
             placeholder="Any specific requirements (e.g., lactose-free)"
             value={formData.note}
             onChange={handleChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            className="form-input"
           />
         </div>
       </div>
-      <div className='flex '>
-          <button
-              onClick={handleSubmit}
-              className="mt-6 w-1/2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
-          >
-              Generate Recipe
-          </button>
+      <div className="form-actions">
+        <button
+          onClick={handleSubmit}
+          className="generate-recipe-btn"
+        >
+          Generate Recipe
+        </button>
       </div>
     </div>
   );
 };
 
+/**
+ * Props for Hero component
+ */
 interface HeroProps {
-  onRecipeSubmit: (formData: {
-    ingredients: string;
-    mealType: string;
-    cuisine: string;
-    cookingTime: string;
-    complexity: string;
-    people: string;
-    note: string;
-  }) => void;
+  onRecipeSubmit: (formData: FormData) => void;
 }
 
+/**
+ * Hero component with recipe generator
+ */
 const Hero: React.FC<HeroProps> = ({ onRecipeSubmit }) => {
   return (
-    <section>
-      {/* Container */}
-      <div className="mx-auto w-full max-w-7xl px-5 py-6 md:px-0 md:py-10 lg:py-10">
-        {/* Component */}
-        <div className="grid gap-12 sm:gap-20 lg:grid-cols-2">
-          {/* Content */}
-          <div className="flex flex-col items-start gap-2">
-            <div className="flex items-center rounded-md bg-gray-300 px-3 py-1">
-              <div className="mr-1 h-2 w-2 rounded-full bg-black"></div>
-              <p className="text-sm">Try Creative</p>
+    <section className="hero-section">
+      <div className="hero-container">
+        <div className="hero-content">
+          <div className="hero-text-container">
+            <div className="hero-badge">
+              <div className="hero-badge-dot"></div>
+              <p className="hero-badge-text">Try Creative</p>
             </div>
-            <p className="text-sm text-gray-500 sm:text-xl">
-              A New Cooking Experience
-            </p>
-            {/* Title */}
-            <h1 className="mb-6 text-4xl font-bold md:text-6xl lg:mb-8">
-              with AI
-            </h1>
-            <p className="text-sm text-gray-500 sm:text-xl">
+            <p className="hero-subtitle">A New Cooking Experience</p>
+            <h1 className="hero-title">with AI</h1>
+            <p className="hero-description">
               Tired of cooking the same thing every day? Let AI inspire you with new, 
               exciting recipes using what you already have. Discover easy, delicious meals from around the world 
               and bring variety back to your table – all while learning about the nutrition in every dish.
             </p>
-            {/* Divider */}
-            <div className="mb-8 mt-8 h-px w-full bg-black"></div>
-            {/* Image with motion effects */}
-            <motion.img
-              src={image_hero}
-              alt="Description of the image"
-              className="w-full max-w-md object-contain rounded-md shadow-lg sm:max-w-lg md:max-w-xl lg:max-w-2xl" // Responsive sizing
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1 }}
-              whileHover={{ scale: 1.05, rotate: 2 }} // Adds hover effect
-            />
-
+            <div className="hero-divider"></div>
+            <div className="hero-image-container">
+              <img 
+                src={image_hero} 
+                alt="Food preparation" 
+                className="hero-image"
+              />
+            </div>
           </div>
-          {/* Recipe Card Component */}
           <RecipeCard onSubmit={onRecipeSubmit} />
         </div>
       </div>
