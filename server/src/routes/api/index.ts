@@ -3,6 +3,7 @@ import { userRouter } from './user-routes.js';
 import { recipeRouter } from './recipe-routes.js';
 import { cocktailRouter } from './cocktail-routes.js';
 import { userProfileRouter } from './user-profile-routes.js';
+import { aiRouter } from './ai-routes.js';
 
 const apiRouter = Router();
 
@@ -19,5 +20,6 @@ apiRouter.use('/users', userRouter);
 apiRouter.use('/recipes', recipeRouter);
 apiRouter.use('/cocktails', cocktailRouter);
 apiRouter.use('/profile', userProfileRouter);
+apiRouter.use('/ai', aiRouter);
 
 export default apiRouter;
