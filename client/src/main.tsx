@@ -17,6 +17,7 @@ import Dashboard from "./pages/dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register.tsx";
 import IngredientsPage from "./pages/Ingredientspage.tsx";
+import AiRecipePage from "./pages/aiRecipes.tsx";
 
 const router = createBrowserRouter([
   {
@@ -59,6 +60,10 @@ const router = createBrowserRouter([
       {
         path: "recipe/:id",
         element: <RecipeDetail recipeId={""} spoonacularApiKey={""} />,
+      },
+      {
+        path: "aiRecipe",
+        element: <AiRecipePage />
       },
       {
         path: "pairing/:recipeId",
