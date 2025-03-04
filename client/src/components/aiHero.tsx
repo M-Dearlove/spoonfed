@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion"; // Import motion from framer-motion
-import image_hero from "../../public/spoonfed.jpg";
+import image_hero from "../../public/images/spoonfed.jpg";
 
 interface RecipeCardProps {
   onSubmit: (formData: {
