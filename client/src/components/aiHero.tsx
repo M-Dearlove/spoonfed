@@ -181,16 +181,12 @@ const Hero: React.FC<HeroProps> = ({ onRecipeSubmit }) => {
       <div className="hero-container">
         <div className="hero-content">
           <div className="hero-text-container">
-            <div className="hero-badge">
-              <div className="hero-badge-dot"></div>
-              <p className="hero-badge-text">Try Creative</p>
-            </div>
             <p className="hero-subtitle">A New Cooking Experience</p>
             <h1 className="hero-title">with AI</h1>
             <p className="hero-description">
               Tired of cooking the same thing every day? Let AI inspire you with new, 
               exciting recipes using what you already have. Discover easy, delicious meals from around the world 
-              and bring variety back to your table – all while learning about the nutrition in every dish.
+              and bring variety back to your table.
             </p>
             <div className="hero-divider"></div>
             <div className="hero-image-container">
